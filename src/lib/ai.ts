@@ -56,7 +56,9 @@ export function detectProperty(
   convo: ConversationWithMessages,
   properties: Property[],
 ): Detection {
-  const active = properties.filter((p) => p.active);
+  // Se buscan también las no disponibles: si alguien pregunta por una que ya se
+  // arrendó o vendió, la IA debe saberlo para avisarle y ofrecer alternativas.
+  const active = properties;
 
   // 1. Selección manual de Fernanda: manda siempre.
   if (convo.property_source === "manual" && convo.property_id) {
@@ -132,6 +134,7 @@ Reglas:
 - Una propiedad puede ofrecerse en varias modalidades (Airbnb por noches, arriendo año corrido, arriendo marzo a diciembre, venta). Responde con los datos de la modalidad que le interesa al cliente. Si no queda claro cuál busca y la propiedad tiene más de una, pregúntaselo en una frase o resume brevemente las opciones.
 - Para Airbnb: si la ficha dice que se reserva solo por Airbnb y hay link, invita a reservar por ahí.
 - Si un campo de la ficha no aparece, ese dato NO se conoce.
+- Si el cliente pregunta por una propiedad que ya no está disponible, díselo con amabilidad y, si hay alguna disponible parecida (sector, tamaño o modalidad), ofrécela brevemente.
 - Cuando tenga sentido, propone el siguiente paso (agendar visita, enviar requisitos, reservar).
 - No firmes el mensaje ni pongas saludos de despedida largos.
 
@@ -142,9 +145,14 @@ Responde ÚNICAMENTE con un objeto JSON:
     ? `\nLa propiedad de esta conversación YA ESTÁ IDENTIFICADA (${detection.source}): ${detection.property.code}. Usa esa ficha.\n`
     : "";
 
+  const inactive = properties.filter((p) => !p.active);
   const user = `Fichas de propiedades disponibles:
 ${active.map(propertyCard).join("\n\n") || "(no hay fichas cargadas)"}
-${fixed}
+${
+  inactive.length
+    ? `\nPropiedades que YA NO ESTÁN DISPONIBLES (arrendadas, vendidas o retiradas):\n${inactive.map((p) => `- ${p.code} — ${p.title} (${p.sector})`).join("\n")}\n`
+    : ""
+}${fixed}
 Canal: ${CHANNEL_LABEL[convo.channel]}
 Nombre del contacto: ${convo.contact_name}
 ${convo.referral_text ? `Llegó desde: ${convo.referral_text}\n` : ""}${convo.notes ? `Notas internas: ${convo.notes}\n` : ""}
@@ -168,7 +176,7 @@ Redacta el borrador de respuesta al último mensaje del cliente.`;
 
   let finalDetection = detection;
   if (!detection.property && out.property_code) {
-    const p = active.find((x) => x.code.toUpperCase() === out.property_code!.toUpperCase());
+    const p = properties.find((x) => x.code.toUpperCase() === out.property_code!.toUpperCase());
     if (p) finalDetection = { property: p, source: "ia", confidence: out.confidence };
   }
 
@@ -207,6 +215,17 @@ function templateDraft(
       property_code: null,
       confidence: "baja",
       reasoning: "No se encontró aviso vinculado ni código en el mensaje.",
+      missing_info: [],
+      generated_at: new Date().toISOString(),
+      engine: "plantilla",
+    };
+  }
+  if (!p.active) {
+    return {
+      text: `¡Hola${name ? " " + name : ""}! Gracias por escribirnos. Te cuento que ${p.title} (${p.code}) ya no está disponible. Si me dices qué estás buscando (sector, dormitorios y modalidad), te muestro otras opciones 😊`,
+      property_code: p.code,
+      confidence: detection.confidence ?? "media",
+      reasoning: "La propiedad consultada está marcada como no disponible.",
       missing_info: [],
       generated_at: new Date().toISOString(),
       engine: "plantilla",

@@ -495,6 +495,7 @@ function ConversationView({
             {properties.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.code} · {p.title}
+                {p.active ? "" : " (no disponible)"}
               </option>
             ))}
           </select>
@@ -512,6 +513,7 @@ function ConversationView({
             <div className="flex flex-wrap items-center gap-1">
               <span className="text-xs font-semibold text-brand">{prop.code}</span>
               <ModalityPills modalities={prop.modalities ?? []} />
+              {!prop.active && <Pill className="bg-[#f8e5e3] text-bad">No disponible</Pill>}
             </div>
             <div className="mt-1 font-semibold leading-snug">{prop.title}</div>
             <div className="mt-1 space-y-0.5 text-muted">

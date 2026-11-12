@@ -80,7 +80,11 @@ export function Properties() {
     return () => clearTimeout(t);
   }, []);
 
-  const visible = items.filter((p) => filter === "todas" || p.modalities?.includes(filter));
+  const [showInactive, setShowInactive] = useState(false);
+  const inactiveCount = items.filter((p) => !p.active).length;
+  const visible = items
+    .filter((p) => showInactive || p.active)
+    .filter((p) => filter === "todas" || p.modalities?.includes(filter));
 
   return (
     <div className="mx-auto h-full max-w-6xl overflow-y-auto p-4 md:p-6">
@@ -107,9 +111,19 @@ export function Properties() {
               filter === m ? "bg-brand text-white" : "bg-white text-muted hover:text-ink"
             }`}
           >
-            {m === "todas" ? `Todas (${items.length})` : MODALITIES[m].label}
+            {m === "todas" ? `Todas (${items.length - inactiveCount})` : MODALITIES[m].label}
           </button>
         ))}
+        {inactiveCount > 0 && (
+          <label className="ml-auto flex items-center gap-1.5 text-xs text-muted">
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+            />
+            Mostrar no disponibles ({inactiveCount})
+          </label>
+        )}
       </div>
 
       {loading && <p className="text-sm text-muted">Cargando…</p>}
@@ -135,7 +149,7 @@ export function Properties() {
                   {p.code}
                 </span>
                 <ModalityPills modalities={p.modalities ?? []} />
-                {!p.active && <Pill className="bg-[#eceef0] text-muted">Inactiva</Pill>}
+                {!p.active && <Pill className="bg-[#f8e5e3] text-bad">No disponible</Pill>}
               </div>
               <div className="mt-2 font-semibold leading-snug">{p.title}</div>
               <div className="mt-1 space-y-0.5 text-sm text-muted">
@@ -304,7 +318,13 @@ function PropertyEditor({
   };
 
   const remove = async () => {
-    if (!id || !confirm(`¿Eliminar ${form.code}? Las conversaciones quedarán sin propiedad asignada.`)) return;
+    if (
+      !id ||
+      !confirm(
+        `¿Eliminar ${form.code} para siempre?\n\nSi solo se arrendó o vendió, es mejor desmarcar "Disponible": así se conserva la ficha y la IA puede avisar que ya no está.`,
+      )
+    )
+      return;
     setBusy("delete");
     await fetch(`/api/properties/${id}`, { method: "DELETE" });
     onSaved();
@@ -543,13 +563,25 @@ function PropertyEditor({
             />
           </section>
 
-          <label className="flex items-center gap-2 text-sm">
+          <label
+            className={`flex items-start gap-3 rounded-xl border p-4 text-sm ${
+              form.active ? "border-line" : "border-bad/40 bg-[#fbf3f2]"
+            }`}
+          >
             <input
               type="checkbox"
+              className="mt-1"
               checked={form.active}
               onChange={(e) => set("active", e.target.checked)}
             />
-            Activa (la IA la considera al responder)
+            <span>
+              <span className="font-semibold">Disponible</span>
+              <span className="block text-xs text-muted">
+                Desmárcala cuando se arriende, se venda o el dueño la retire. La ficha se guarda
+                para el historial y la IA les dirá a quienes pregunten que ya no está disponible,
+                ofreciendo alternativas parecidas.
+              </span>
+            </span>
           </label>
         </div>
 
