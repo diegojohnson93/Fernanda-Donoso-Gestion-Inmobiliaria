@@ -25,7 +25,7 @@ export const SITE = {
 
   intro: {
     title: "Mucho más que una corredora",
-    text: "Antes de mostrarte propiedades, conversamos. Entendemos tu situación y tus objetivos para recomendarte lo que de verdad te conviene. Cobramos la comisión estándar del mercado, pero recibes asesoría, acompañamiento y gestión de principio a fin.",
+    text: "Antes de mostrarte propiedades, conversamos. Entendemos tu situación y tus objetivos para recomendarte lo que de verdad te conviene.",
   },
 
   advisory: {
