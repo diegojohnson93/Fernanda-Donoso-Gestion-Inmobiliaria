@@ -64,7 +64,7 @@ export const SITE = {
     title: "Hola, soy Fernanda",
     paragraphs: [
       "Soy Ingeniera Civil Industrial de la Pontificia Universidad Católica de Valparaíso y llevo más de tres años en el rubro inmobiliario, asesorando a familias, estudiantes, viajeros e inversionistas en Viña del Mar, Reñaca y Concón.",
-      "Creo en la inversión inmobiliaria y la practico: mi portafolio personal incluye más de cuatro propiedades propias. Por eso te asesoro como lo haría para mí, con números claros y atención personal.",
+      "Creo en la inversión inmobiliaria y la practico: mi portafolio personal incluye varias propiedades propias. Por eso te asesoro como lo haría para mí, con números claros y atención preferencial.",
     ],
     stats: [
       { value: "Ing. Civil Industrial", label: "Pontificia Universidad Católica de Valparaíso" },
