@@ -24,3 +24,69 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
+
+/* ---------------------------------------------------------------------- */
+/* Web pública                                                             */
+/* ---------------------------------------------------------------------- */
+@theme {
+  --color-cream: #f5f1ea;
+  --color-sand: #ebe4d8;
+  --color-beige: #d8ccbc;
+  --color-taupe: #a8977f;
+  --color-stone: #7b7168;
+  --color-charcoal: #2d2a27;
+  --color-graphite: #45403b;
+  --color-cat-airbnb: #8b9784;
+  --color-cat-temporada: #a8887f;
+  --color-cat-anual: #6c7470;
+  --color-cat-venta: #2d2a27;
+  --font-serif: "Cormorant Garamond", "Cormorant", Georgia, serif;
+  --font-site: "Manrope Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+
+.site {
+  font-family: var(--font-site);
+  background: var(--color-cream);
+  color: var(--color-charcoal);
+  -webkit-font-smoothing: antialiased;
+}
+
+.site ::selection {
+  background: var(--color-beige);
+}
+
+.eyebrow {
+  font-family: var(--font-site);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee 38s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+.vertical-title {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.site .font-serif {
+  font-variant-numeric: lining-nums;
+}

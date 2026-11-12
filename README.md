@@ -7,10 +7,19 @@ La IA nunca envía nada sola.
 
 ## Rutas
 
-- `/` — web pública (en construcción).
+- `/` — web pública: portada, asesoría gratuita, modalidades, destacadas, nosotros y contacto.
+- `/propiedades/airbnb`, `/propiedades/marzo-diciembre`, `/propiedades/ano-corrido`, `/propiedades/inversion` — listado por modalidad.
+- `/propiedad/<código>` — ficha pública de cada propiedad (galería, valores, WhatsApp y formulario).
+- `/propietarios` — captación de propietarios.
 - `/admin` — bandeja de mensajes (protegida con contraseña).
 - `/admin/propiedades` — fichas de propiedades.
 - `/api/public/contact` — formularios de la web (consulta y captación de propietarios), sin contraseña.
+
+## Textos de la web
+
+Todos los textos públicos (portada, asesoría, inversión, Fernanda, propietarios, WhatsApp) están
+en [`src/lib/site.ts`](src/lib/site.ts). Los colores y tipografías, en `src/app/globals.css`
+(sección "Web pública"). El logo está en `src/components/site/Logo.tsx`.
 
 ## Qué hace
 

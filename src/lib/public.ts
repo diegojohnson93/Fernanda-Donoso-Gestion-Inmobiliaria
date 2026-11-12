@@ -1,4 +1,4 @@
-import type { Details, Modality } from "./ficha";
+import { FICHA, MODALITIES, priceLines, type Details, type Modality } from "./ficha";
 import { getStore } from "./store";
 import type { Photo, Property } from "./types";
 
@@ -56,4 +56,51 @@ export async function getPublishedProperties(): Promise<PublicProperty[]> {
 export async function getPublishedProperty(slug: string): Promise<PublicProperty | null> {
   const all = await getPublishedProperties();
   return all.find((p) => p.slug === slug.toLowerCase()) ?? null;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Ayudas de presentación                                                    */
+/* ------------------------------------------------------------------------ */
+
+
+/** Campos que no se muestran en la web aunque estén en la ficha. */
+const HIDDEN_ON_WEB = new Set(["negociable", "link_airbnb"]);
+
+export function priceFor(p: PublicProperty, m: Modality): string {
+  return priceLines([m], p.details)[0]?.text ?? "";
+}
+
+export function factsLine(p: PublicProperty): string {
+  return [
+    p.bedrooms ? `${p.bedrooms} ${p.bedrooms === 1 ? "dormitorio" : "dormitorios"}` : null,
+    p.bathrooms ? `${p.bathrooms} ${p.bathrooms === 1 ? "baño" : "baños"}` : null,
+    p.area_m2 ? `${p.area_m2} m²` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+export interface DetailSection {
+  id: string;
+  title: string;
+  modality?: Modality;
+  rows: { label: string; value: string }[];
+}
+
+export function detailSections(p: PublicProperty): DetailSection[] {
+  return FICHA.filter((s) => !s.modality || p.modalities.includes(s.modality))
+    .map((s) => ({
+      id: s.id,
+      title: s.modality ? MODALITIES[s.modality].label : s.title,
+      modality: s.modality,
+      rows: s.fields
+        .filter((f) => !HIDDEN_ON_WEB.has(f.key))
+        .map((f) => {
+          const v = p.details[f.key];
+          const value = Array.isArray(v) ? v.join(", ") : (v ?? "");
+          return { label: f.label, value };
+        })
+        .filter((r) => r.value),
+    }))
+    .filter((s) => s.rows.length);
 }
