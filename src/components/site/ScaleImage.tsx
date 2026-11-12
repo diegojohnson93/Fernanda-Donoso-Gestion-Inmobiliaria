@@ -3,14 +3,14 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 /** Foto que parte pequeña y crece hasta ocupar todo el ancho al hacer scroll. */
 export function ScaleImage({ src, alt = "", fallbackBg = "bg-beige" }: { src: string | null; alt?: string; fallbackBg?: string }) {
   const wrap = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!wrap.current || !box.current) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     gsap.registerPlugin(ScrollTrigger);

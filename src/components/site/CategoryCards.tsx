@@ -33,7 +33,6 @@ export function CategoryCards({
               <div className="flex flex-1 flex-col justify-center px-4">
                 <span className="font-serif text-[28px] leading-none">
                   {c.title}
-                  {c.note && <span className="ml-1 text-base italic opacity-80">({c.note})</span>}
                 </span>
                 <span className="mt-1 text-[11px] opacity-80">
                   {count} {count === 1 ? "propiedad" : "propiedades"}
@@ -72,8 +71,7 @@ export function CategoryCards({
                   }`}
                 >
                   {c.title}
-                  {c.note && <span className="ml-1 text-[0.5em] italic opacity-80">({c.note})</span>}
-                </h3>
+                  </h3>
               </div>
             </div>
             <div className={`relative overflow-hidden ${compact ? "h-16 md:h-28" : "h-24 md:h-40"} ${c.bg}`}>

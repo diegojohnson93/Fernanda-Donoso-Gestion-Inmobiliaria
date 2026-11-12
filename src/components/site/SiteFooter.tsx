@@ -19,7 +19,6 @@ export function SiteFooter() {
               <li key={c.slug}>
                 <Link href={`/propiedades/${c.slug}`} className="hover:text-cream">
                   {c.title}
-                  {c.note ? ` (${c.note})` : ""}
                 </Link>
               </li>
             ))}

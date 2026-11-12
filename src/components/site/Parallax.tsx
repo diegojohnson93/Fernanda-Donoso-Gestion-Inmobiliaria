@@ -2,12 +2,12 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 
 /** Hijos con data-speed se desplazan a distinta velocidad al hacer scroll. */
 export function Parallax({ children, className = "" }: { children: ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!ref.current) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (window.matchMedia("(max-width: 767px)").matches) return;

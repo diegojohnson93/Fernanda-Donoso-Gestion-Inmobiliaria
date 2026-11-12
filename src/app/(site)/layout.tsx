@@ -31,5 +31,16 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       cover: list.find((p) => p.photos[0])?.photos[0].url ?? null,
     };
   });
-  return <SiteShell categories={categories}>{children}</SiteShell>;
+  return (
+    <>
+      {/* Marca que hay JavaScript (para preparar efectos sin parpadeo); se quita sola por seguridad. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "document.documentElement.classList.add('js');setTimeout(function(){document.documentElement.classList.remove('js')},3500)",
+        }}
+      />
+      <SiteShell categories={categories}>{children}</SiteShell>
+    </>
+  );
 }

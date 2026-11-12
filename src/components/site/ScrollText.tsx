@@ -2,7 +2,7 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 /**
  * Párrafo grande con sangría en la primera línea. Las palabras pasan de
@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 export function ScrollText({ text, className = "" }: { text: string; className?: string }) {
   const ref = useRef<HTMLParagraphElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!ref.current) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     gsap.registerPlugin(ScrollTrigger);

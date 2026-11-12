@@ -46,7 +46,7 @@ body {
 
 .site {
   font-family: var(--font-site);
-  background: var(--color-cream);
+  background: #ffffff;
   color: var(--color-charcoal);
   -webkit-font-smoothing: antialiased;
 }
@@ -89,4 +89,26 @@ body {
 
 .site .font-serif {
   font-variant-numeric: lining-nums;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Mientras JavaScript prepara el efecto, el texto no parpadea. */
+html.js [data-split]:not([data-ready]) {
+  visibility: hidden;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }

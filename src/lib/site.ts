@@ -34,7 +34,7 @@ export const SITE = {
 
   advisory: {
     eyebrow: "Asesoría gratuita",
-    title: "Una conversación que ilumina el camino",
+    title: "Vamos a tomar un café",
     text: "Revisamos juntos tu situación para encontrar la mejor solución según tus ingresos, tus expectativas, tu nivel de ahorro y tu nivel de endeudamiento. Esa primera conversación es gratis y, muchas veces, cambia por completo la forma de ver tu decisión.",
     factors: ["Tus ingresos", "Tus expectativas", "Tu nivel de ahorro", "Tu nivel de endeudamiento"],
     steps: [
@@ -58,9 +58,19 @@ export const SITE = {
   },
 
   invest: {
-    eyebrow: "Inversión inmobiliaria",
-    quote: "Sin darte cuenta, ahorraste y te capitalizaste gracias a la compra de un departamento para vivir o arrendar.",
+    eyebrow: "Nuestra mirada",
+    quote:
+      "Para nosotros, una propiedad es mucho más que metros cuadrados. Es todo lo que la rodea: las personas que la habitan, el barrio que la envuelve y la forma en que un espacio se integra a una vida que ya está en movimiento. Para eso trabajamos, en la costa que conocemos bien.",
     text: "Las propiedades son un equilibrio entre seguridad e inversión inteligente que se paga sola. En muchos casos es posible comprar aunque no tengas el 100% del pie, y casi siempre hay espacio para negociar.",
+  },
+
+  /** Página Nosotros. */
+  aboutPage: {
+    marquee: "Nosotros",
+    statement:
+      "Fernanda Donoso Asesoría & Gestión Inmobiliaria acompaña a quienes buscan comprar, arrendar o invertir en Viña del Mar, Reñaca y Concón, con una mirada financiera, números claros y atención preferencial en cada paso.",
+    quote: "Una buena propiedad no es un gasto: con los números claros, es una decisión que trabaja para ti.",
+    closing: "Fernanda Donoso",
   },
 
   about: {
@@ -73,7 +83,6 @@ export const SITE = {
     stats: [
       { value: "Ing. Civil Industrial", label: "Pontificia Universidad Católica de Valparaíso" },
       { value: "+3 años", label: "en el rubro inmobiliario" },
-      { value: "+4", label: "propiedades propias en su portafolio" },
       { value: "Gratis", label: "la primera asesoría" },
     ],
   },
@@ -85,7 +94,7 @@ export const SITE = {
       { title: "Asesoría personalizada", text: "Una primera conversación gratuita para entender tu caso y recomendarte lo que de verdad te conviene." },
       { title: "Fotos de calidad", text: "Cada propiedad se presenta con buenas fotos, para que veas lo que de verdad vas a encontrar." },
       { title: "Negociación", text: "Siempre hay algo que conversar: buscamos las mejores condiciones para ti." },
-      { title: "Acompañamiento completo", text: "De la primera visita a la entrega de llaves, una sola persona a cargo y siempre disponible." },
+      { title: "Acompañamiento", text: "De la primera visita a la entrega de llaves, una sola persona a cargo y siempre disponible." },
     ],
   },
 
@@ -148,9 +157,8 @@ export const CATEGORIES: Category[] = [
   },
   {
     modality: "venta",
-    slug: "inversion",
-    title: "Compra",
-    note: "Inversión",
+    slug: "comprar",
+    title: "Comprar",
     description: "Para vivir, arrendar\no capitalizarte",
     lead: "Propiedades en venta para vivir o invertir. Te asesoramos gratis para que compres con números claros.",
     bg: "bg-cat-venta",
@@ -158,6 +166,24 @@ export const CATEGORIES: Category[] = [
     hex: "#2d2a27",
   },
 ];
+
+/** Pregunta al elegir "Comprar": ¿para invertir o para vivir? */
+export const BUY_INTENTS = {
+  invertir: {
+    label: "Para invertir",
+    text: "Te ayudamos a evaluar cada propiedad como inversión: arriendo esperado, gastos, financiamiento y cuánto pie necesitas. La primera asesoría es gratis.",
+    cta: "Quiero asesoría para invertir",
+    whatsapp: "Hola Fernanda, quiero comprar una propiedad para invertir",
+  },
+  vivir: {
+    label: "Para vivir",
+    text: "Te ayudamos a encontrar tu hogar y a revisar tu capacidad de compra según tus ingresos, tu ahorro y tu nivel de endeudamiento. La primera asesoría es gratis.",
+    cta: "Quiero asesoría para comprar",
+    whatsapp: "Hola Fernanda, quiero comprar una propiedad para vivir",
+  },
+} as const;
+
+export type BuyIntent = keyof typeof BUY_INTENTS;
 
 export const categoryBySlug = (slug: string) => CATEGORIES.find((c) => c.slug === slug) ?? null;
 export const categoryFor = (m: Modality) => CATEGORIES.find((c) => c.modality === m)!;

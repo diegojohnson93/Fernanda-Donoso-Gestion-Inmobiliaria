@@ -8,9 +8,10 @@ La IA nunca envía nada sola.
 ## Rutas
 
 - `/` — web pública: portada, asesoría gratuita, modalidades, destacadas, nosotros y contacto.
-- `/propiedades/airbnb`, `/propiedades/marzo-diciembre`, `/propiedades/ano-corrido`, `/propiedades/inversion` — listado por modalidad.
+- `/propiedades/airbnb`, `/propiedades/marzo-diciembre`, `/propiedades/ano-corrido`, `/propiedades/comprar` — listado por modalidad.
 - `/propiedad/<código>` — ficha pública de cada propiedad (galería, valores, WhatsApp y formulario).
 - `/propietarios` — captación de propietarios.
+- `/nosotros` — quién es Fernanda.
 - `/admin` — bandeja de mensajes (protegida con contraseña).
 - `/admin/propiedades` — fichas de propiedades.
 - `/api/public/contact` — formularios de la web (consulta y captación de propietarios), sin contraseña.

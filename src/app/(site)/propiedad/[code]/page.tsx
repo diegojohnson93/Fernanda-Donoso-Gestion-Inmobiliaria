@@ -108,7 +108,7 @@ export default async function PropertyPage({ params }: PageProps<"/propiedad/[co
                 <div className="mt-4 space-y-4">
                   {p.modalities.map((m) => (
                     <div key={m}>
-                      <p className="text-xs text-stone">{categoryFor(m).title}{categoryFor(m).note ? ` (${categoryFor(m).note})` : ""}</p>
+                      <p className="text-xs text-stone">{categoryFor(m).title}</p>
                       <p className="font-serif text-[30px] leading-tight">{priceFor(p, m)}</p>
                     </div>
                   ))}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { BuyIntentPrompt } from "@/components/site/BuyIntent";
 import { MarqueeHero } from "@/components/site/Marquee";
 import { PropertyCard } from "@/components/site/PropertyCard";
 import { Reveal } from "@/components/site/Reveal";
@@ -15,7 +16,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/propiedades/[slug]">): Promise<Metadata> {
   const c = categoryBySlug((await params).slug);
   if (!c) return {};
-  const title = `${c.title}${c.note ? ` (${c.note})` : ""}`;
+  const title = c.title;
   return { title, description: c.lead };
 }
 
@@ -42,6 +43,11 @@ export default async function CategoryPage({ params }: PageProps<"/propiedades/[
 
       <section className="px-5 py-24 md:px-12 md:py-32">
         <div className="mx-auto max-w-[1340px]">
+          {c.modality === "venta" && (
+            <div className="mb-16">
+              <BuyIntentPrompt />
+            </div>
+          )}
           {list.length ? (
             <div className="grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
               {list.map((p, i) => (
@@ -58,7 +64,7 @@ export default async function CategoryPage({ params }: PageProps<"/propiedades/[
                 para definir la mejor opción.
               </p>
               <a
-                href={whatsappLink(`Hola Fernanda, busco una propiedad en ${c.title}${c.note ? ` (${c.note})` : ""}`)}
+                href={whatsappLink(`Hola Fernanda, busco una propiedad en ${c.title}`)}
                 target="_blank"
                 rel="noreferrer"
                 className="eyebrow mt-8 inline-flex h-12 items-center border border-charcoal px-7 transition hover:bg-charcoal hover:text-cream"

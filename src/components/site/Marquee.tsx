@@ -53,3 +53,36 @@ export function MarqueeHero({
     </div>
   );
 }
+
+/** Solo el texto gigante que se desliza (sin foto al centro). */
+export function MarqueeText({
+  text,
+  className = "",
+  separator = true,
+}: {
+  text: string;
+  className?: string;
+  separator?: boolean;
+}) {
+  const item = (
+    <span className="flex shrink-0 items-center whitespace-nowrap">
+      <span className="px-[0.2em]">{text}</span>
+      {separator && (
+        <span className="px-[0.2em] text-[0.35em] opacity-60" aria-hidden>
+          ✦
+        </span>
+      )}
+    </span>
+  );
+  return (
+    <div className={`overflow-hidden ${className}`}>
+      <div className="marquee-track flex w-max leading-none" aria-hidden>
+        {item}
+        {item}
+        {item}
+        {item}
+      </div>
+      <span className="sr-only">{text}</span>
+    </div>
+  );
+}
