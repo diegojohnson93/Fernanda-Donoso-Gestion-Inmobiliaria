@@ -1,3 +1,4 @@
+import { MODALITIES, detailsToText, extractionSchema, priceLines } from "./ficha";
 import type {
   Confidence,
   ConversationWithMessages,
@@ -87,15 +88,17 @@ export function detectProperty(
 /* Borrador de respuesta                                                     */
 /* ------------------------------------------------------------------------ */
 
+/** Ficha tal como la recibe la IA. Las notas privadas NUNCA se incluyen. */
 function propertyCard(p: Property): string {
   return [
     `### ${p.code} — ${p.title}`,
-    `Operación: ${p.operation} | Precio: ${p.price}`,
-    `Sector: ${p.sector} | Dirección: ${p.address}`,
-    `Dormitorios: ${p.bedrooms ?? "?"} | Baños: ${p.bathrooms ?? "?"} | Superficie: ${p.area_m2 ?? "?"} m²`,
+    `Modalidades: ${p.modalities.map((m) => MODALITIES[m].label).join(", ")}`,
+    `Precios: ${priceLines(p.modalities, p.details).map((l) => `${MODALITIES[l.modality].short}: ${l.text}`).join(" | ")}`,
+    `Sector: ${p.sector || "?"} | Dirección: ${p.address || "?"}`,
+    `Dormitorios: ${p.bedrooms ?? "?"} | Baños: ${p.bathrooms ?? "?"} | Superficie útil: ${p.area_m2 ?? "?"} m²`,
+    detailsToText(p.modalities, p.details),
+    p.brief ? `[Información adicional]\n${p.brief}` : "",
     p.links ? `Links: ${p.links}` : "",
-    "Ficha:",
-    p.brief,
   ]
     .filter(Boolean)
     .join("\n");
@@ -126,7 +129,10 @@ Reglas:
 - Usa SOLO la información de las fichas. Nunca inventes precios, disponibilidad, requisitos ni características.
 - Si el cliente pregunta algo que la ficha no dice, no lo supongas: di que lo confirmarás a la brevedad y agrégalo a "missing_info".
 - Identifica de qué propiedad habla el cliente. Si no puedes saberlo con seguridad, NO elijas una: pregunta amablemente por cuál consulta (código del aviso, sector o tipo de propiedad) y deja "property_code" en null.
-- Cuando tenga sentido, propone el siguiente paso (agendar visita, enviar requisitos).
+- Una propiedad puede ofrecerse en varias modalidades (Airbnb por noches, arriendo año corrido, arriendo marzo a diciembre, venta). Responde con los datos de la modalidad que le interesa al cliente. Si no queda claro cuál busca y la propiedad tiene más de una, pregúntaselo en una frase o resume brevemente las opciones.
+- Para Airbnb: si la ficha dice que se reserva solo por Airbnb y hay link, invita a reservar por ahí.
+- Si un campo de la ficha no aparece, ese dato NO se conoce.
+- Cuando tenga sentido, propone el siguiente paso (agendar visita, enviar requisitos, reservar).
 - No firmes el mensaje ni pongas saludos de despedida largos.
 
 Responde ÚNICAMENTE con un objeto JSON:
@@ -206,8 +212,11 @@ function templateDraft(
       engine: "plantilla",
     };
   }
+  const prices = priceLines(p.modalities, p.details)
+    .map((l) => { const lb = MODALITIES[l.modality].label; return `${lb.charAt(0).toLowerCase()}${lb.slice(1)}: ${l.text}`; })
+    .join("; ");
   return {
-    text: `¡Hola${name ? " " + name : ""}! Gracias por tu interés en ${p.title} (${p.code}). Está en ${p.operation} por ${p.price}. ¿Te gustaría coordinar una visita?`,
+    text: `¡Hola${name ? " " + name : ""}! Gracias por tu interés en ${p.title} (${p.code}). Se ofrece en ${prices}. ¿Te gustaría coordinar una visita?`,
     property_code: p.code,
     confidence: detection.confidence ?? "media",
     reasoning:
@@ -233,7 +242,7 @@ export async function extractPropertyFromPdf(
     throw new Error("Para leer PDFs se necesita configurar ANTHROPIC_API_KEY.");
   }
   const raw = await callClaude({
-    max_tokens: 2048,
+    max_tokens: 4096,
     messages: [
       {
         role: "user",
@@ -244,8 +253,23 @@ export async function extractPropertyFromPdf(
           },
           {
             type: "text",
-            text: `Este documento describe una propiedad en venta o arriendo en Chile. Extrae sus datos y responde ÚNICAMENTE con un JSON:
-{"title": "título corto, p. ej. 'Depto 2D2B vista al mar, Reñaca'", "operation": "venta" | "arriendo", "price": "precio tal como aparece, con moneda (UF o $)", "sector": "comuna o sector", "address": "dirección o referencia", "bedrooms": número | null, "bathrooms": número | null, "area_m2": número | null, "brief": "resumen completo en líneas cortas con TODO dato útil para responder consultas: gastos comunes, estacionamiento, bodega, mascotas, requisitos, disponibilidad, amenidades, horarios de visita, etc. No inventes nada."}`,
+            text: `Este documento describe una propiedad en Chile. Extrae sus datos para completar una ficha. No inventes nada: omite lo que el documento no diga. En los campos con opciones usa exactamente una de ellas.
+
+Responde ÚNICAMENTE con un JSON con esta forma:
+{
+  "title": "título corto, p. ej. 'Depto 2D2B vista al mar, Reñaca'",
+  "modalities": ["airbnb" | "anual" | "temporada" | "venta"]  (airbnb = arriendo por noches; anual = arriendo año corrido; temporada = arriendo marzo a diciembre; venta),
+  "sector": "comuna o sector",
+  "address": "dirección o referencia",
+  "bedrooms": número o null,
+  "bathrooms": número o null,
+  "area_m2": superficie útil, número o null,
+  "details": { ...campos de abajo que el documento mencione... },
+  "brief": "todo dato útil que no calce en los campos, en líneas cortas"
+}
+
+Campos disponibles para "details":
+${extractionSchema()}`,
           },
         ],
       },

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { MODALITIES, type Modality } from "@/lib/ficha";
 import type { Channel, Confidence, ConversationStatus } from "@/lib/types";
 
 export const CHANNELS: Record<Channel, { label: string; short: string; className: string }> = {
@@ -42,6 +43,25 @@ export function Pill({ className, children }: { className: string; children: Rea
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${className}`}>
       {children}
     </span>
+  );
+}
+
+export const MODALITY_STYLE: Record<Modality, string> = {
+  airbnb: "bg-[#fdeceb] text-[#b23a3a]",
+  anual: "bg-brand-soft text-brand",
+  temporada: "bg-[#efe9f8] text-[#5b3f99]",
+  venta: "bg-accent-soft text-accent",
+};
+
+export function ModalityPills({ modalities }: { modalities: Modality[] }) {
+  return (
+    <>
+      {modalities.map((m) => (
+        <Pill key={m} className={MODALITY_STYLE[m]}>
+          {MODALITIES[m].short}
+        </Pill>
+      ))}
+    </>
   );
 }
 

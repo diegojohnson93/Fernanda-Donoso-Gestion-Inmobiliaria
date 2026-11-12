@@ -7,8 +7,10 @@ import type {
   ConversationWithMessages,
   Property,
 } from "@/lib/types";
+import { MODALITIES, detailsToText, priceLines } from "@/lib/ficha";
 import {
   Button,
+  ModalityPills,
   CHANNELS,
   ChannelBadge,
   CONFIDENCE,
@@ -507,10 +509,17 @@ function ConversationView({
 
         {prop && (
           <div className="rounded-xl border border-line p-3 text-sm">
-            <div className="text-xs font-semibold text-brand">{prop.code}</div>
-            <div className="font-semibold">{prop.title}</div>
-            <div className="mt-1 text-muted">
-              {prop.operation === "venta" ? "Venta" : "Arriendo"} · {prop.price}
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="text-xs font-semibold text-brand">{prop.code}</span>
+              <ModalityPills modalities={prop.modalities ?? []} />
+            </div>
+            <div className="mt-1 font-semibold leading-snug">{prop.title}</div>
+            <div className="mt-1 space-y-0.5 text-muted">
+              {priceLines(prop.modalities ?? [], prop.details ?? {}).map((l) => (
+                <div key={l.modality}>
+                  <span className="text-ink/70">{MODALITIES[l.modality].short}:</span> {l.text}
+                </div>
+              ))}
             </div>
             <div className="text-muted">
               {[
@@ -522,9 +531,16 @@ function ConversationView({
                 .filter(Boolean)
                 .join(" · ")}
             </div>
-            <p className="mt-2 max-h-56 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-ink/80">
-              {prop.brief}
+            <p className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-ink/80">
+              {[detailsToText(prop.modalities ?? [], prop.details ?? {}), prop.brief]
+                .filter(Boolean)
+                .join("\n")}
             </p>
+            {prop.private_notes && (
+              <div className="mt-2 rounded-lg bg-[#f4f4f2] p-2 text-xs">
+                <b>Nota privada:</b> {prop.private_notes}
+              </div>
+            )}
           </div>
         )}
 

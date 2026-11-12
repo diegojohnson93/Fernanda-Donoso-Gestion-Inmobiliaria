@@ -1,20 +1,30 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  MODALITIES,
+  MODALITY_KEYS,
+  priceLines,
+  sectionsFor,
+  type Details,
+  type FieldDef,
+  type Modality,
+} from "@/lib/ficha";
 import type { Property } from "@/lib/types";
-import { Button, Pill, inputClass } from "./ui";
+import { Button, ModalityPills, Pill, inputClass } from "./ui";
 
 type FormState = {
   code: string;
   title: string;
-  operation: "venta" | "arriendo";
-  price: string;
+  modalities: Modality[];
   sector: string;
   address: string;
   bedrooms: string;
   bathrooms: string;
   area_m2: string;
+  details: Details;
   brief: string;
+  private_notes: string;
   ad_ids: string;
   links: string;
   active: boolean;
@@ -23,14 +33,15 @@ type FormState = {
 const empty: FormState = {
   code: "",
   title: "",
-  operation: "arriendo",
-  price: "",
+  modalities: [],
   sector: "",
   address: "",
   bedrooms: "",
   bathrooms: "",
   area_m2: "",
+  details: {},
   brief: "",
+  private_notes: "",
   ad_ids: "",
   links: "",
   active: true,
@@ -39,14 +50,15 @@ const empty: FormState = {
 const toForm = (p: Property): FormState => ({
   code: p.code,
   title: p.title,
-  operation: p.operation,
-  price: p.price,
+  modalities: p.modalities ?? [],
   sector: p.sector,
   address: p.address,
   bedrooms: p.bedrooms?.toString() ?? "",
   bathrooms: p.bathrooms?.toString() ?? "",
   area_m2: p.area_m2?.toString() ?? "",
+  details: p.details ?? {},
   brief: p.brief,
+  private_notes: p.private_notes ?? "",
   ad_ids: p.ad_ids.join(", "),
   links: p.links,
   active: p.active,
@@ -56,6 +68,7 @@ export function Properties() {
   const [items, setItems] = useState<Property[]>([]);
   const [editing, setEditing] = useState<{ id: string | null; form: FormState } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<Modality | "todas">("todas");
 
   const load = async () => {
     const res = await fetch("/api/properties");
@@ -67,20 +80,36 @@ export function Properties() {
     return () => clearTimeout(t);
   }, []);
 
+  const visible = items.filter((p) => filter === "todas" || p.modalities?.includes(filter));
+
   return (
     <div className="mx-auto h-full max-w-6xl overflow-y-auto p-4 md:p-6">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Propiedades</h1>
           <p className="max-w-2xl text-sm text-muted">
-            Cada ficha es lo que la IA usa para responder. Usa el <b>código</b> en tus avisos y
-            publicaciones (por ejemplo “Consulta por REN-01”) y vincula los IDs de los avisos de
+            Cada ficha se llena una sola vez y es lo que la IA usa para responder. Usa el{" "}
+            <b>código</b> en tus avisos (“Consulta por REN-01”) y vincula los IDs de los avisos de
             Meta para que la propiedad se detecte sola.
           </p>
         </div>
         <Button variant="primary" onClick={() => setEditing({ id: null, form: empty })}>
           + Nueva propiedad
         </Button>
+      </div>
+
+      <div className="mb-4 flex flex-wrap gap-1">
+        {(["todas", ...MODALITY_KEYS] as const).map((m) => (
+          <button
+            key={m}
+            onClick={() => setFilter(m)}
+            className={`rounded-full px-3 py-1 text-xs font-medium ${
+              filter === m ? "bg-brand text-white" : "bg-white text-muted hover:text-ink"
+            }`}
+          >
+            {m === "todas" ? `Todas (${items.length})` : MODALITIES[m].label}
+          </button>
+        ))}
       </div>
 
       {loading && <p className="text-sm text-muted">Cargando…</p>}
@@ -91,45 +120,52 @@ export function Properties() {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => setEditing({ id: p.id, form: toForm(p) })}
-            className={`rounded-2xl border border-line bg-white p-4 text-left shadow-sm transition hover:border-brand ${
-              p.active ? "" : "opacity-60"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <span className="rounded-md bg-brand px-2 py-0.5 text-xs font-bold text-white">
-                {p.code}
-              </span>
-              <Pill className="bg-[#eef0f2] text-muted">
-                {p.operation === "venta" ? "Venta" : "Arriendo"}
-              </Pill>
-              {!p.active && <Pill className="bg-[#eceef0] text-muted">Inactiva</Pill>}
-            </div>
-            <div className="mt-2 font-semibold leading-snug">{p.title}</div>
-            <div className="text-sm text-muted">{p.price}</div>
-            <div className="mt-1 text-xs text-muted">
-              {[
-                p.bedrooms && `${p.bedrooms}D`,
-                p.bathrooms && `${p.bathrooms}B`,
-                p.area_m2 && `${p.area_m2} m²`,
-                p.sector,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </div>
-            <div className="mt-3 flex gap-3 text-[11px] text-muted">
-              <span>{p.brief ? `${p.brief.split("\n").length} líneas de ficha` : "Ficha vacía"}</span>
-              <span>
-                {p.ad_ids.length
-                  ? `${p.ad_ids.length} aviso${p.ad_ids.length > 1 ? "s" : ""} vinculado${p.ad_ids.length > 1 ? "s" : ""}`
-                  : "Sin avisos vinculados"}
-              </span>
-            </div>
-          </button>
-        ))}
+        {visible.map((p) => {
+          const filled = Object.keys(p.details ?? {}).length;
+          return (
+            <button
+              key={p.id}
+              onClick={() => setEditing({ id: p.id, form: toForm(p) })}
+              className={`flex flex-col rounded-2xl border border-line bg-white p-4 text-left shadow-sm transition hover:border-brand ${
+                p.active ? "" : "opacity-60"
+              }`}
+            >
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="rounded-md bg-brand px-2 py-0.5 text-xs font-bold text-white">
+                  {p.code}
+                </span>
+                <ModalityPills modalities={p.modalities ?? []} />
+                {!p.active && <Pill className="bg-[#eceef0] text-muted">Inactiva</Pill>}
+              </div>
+              <div className="mt-2 font-semibold leading-snug">{p.title}</div>
+              <div className="mt-1 space-y-0.5 text-sm text-muted">
+                {priceLines(p.modalities ?? [], p.details ?? {}).map((l) => (
+                  <div key={l.modality}>
+                    <span className="text-ink/70">{MODALITIES[l.modality].short}:</span> {l.text}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-1 text-xs text-muted">
+                {[
+                  p.bedrooms && `${p.bedrooms}D`,
+                  p.bathrooms && `${p.bathrooms}B`,
+                  p.area_m2 && `${p.area_m2} m²`,
+                  p.sector,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </div>
+              <div className="mt-3 flex gap-3 text-[11px] text-muted">
+                <span>{filled} campos completos</span>
+                <span>
+                  {p.ad_ids.length
+                    ? `${p.ad_ids.length} aviso${p.ad_ids.length > 1 ? "s" : ""} vinculado${p.ad_ids.length > 1 ? "s" : ""}`
+                    : "Sin avisos vinculados"}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {editing && (
@@ -144,6 +180,79 @@ export function Properties() {
         />
       )}
     </div>
+  );
+}
+
+const SPAN = { 2: "sm:col-span-2", 3: "sm:col-span-3", 4: "sm:col-span-4", 6: "sm:col-span-6" } as const;
+
+function FieldInput({
+  field,
+  value,
+  onChange,
+}: {
+  field: FieldDef;
+  value: string | string[] | undefined;
+  onChange: (v: string | string[]) => void;
+}) {
+  const span = SPAN[field.span ?? 3];
+  const label = <span className="mb-1 block text-xs font-medium text-muted">{field.label}</span>;
+
+  if (field.type === "multi") {
+    const selected = Array.isArray(value) ? value : [];
+    return (
+      <div className={`col-span-6 ${span}`}>
+        {label}
+        <div className="flex flex-wrap gap-1.5">
+          {field.options!.map((opt) => {
+            const on = selected.includes(opt);
+            return (
+              <button
+                type="button"
+                key={opt}
+                onClick={() => onChange(on ? selected.filter((x) => x !== opt) : [...selected, opt])}
+                className={`rounded-full border px-2.5 py-1 text-xs ${
+                  on ? "border-brand bg-brand-soft text-brand" : "border-line text-muted hover:text-ink"
+                }`}
+              >
+                {on ? "✓ " : ""}
+                {opt}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  const str = typeof value === "string" ? value : "";
+  return (
+    <label className={`col-span-6 block ${span}`}>
+      {label}
+      {field.type === "select" ? (
+        <select className={inputClass} value={str} onChange={(e) => onChange(e.target.value)}>
+          <option value="">—</option>
+          {field.options!.map((o) => (
+            <option key={o}>{o}</option>
+          ))}
+          {str && !field.options!.includes(str) && <option>{str}</option>}
+        </select>
+      ) : field.type === "textarea" ? (
+        <textarea
+          className={`${inputClass} min-h-[72px]`}
+          value={str}
+          placeholder={field.placeholder}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      ) : (
+        <input
+          className={inputClass}
+          value={str}
+          placeholder={field.placeholder}
+          inputMode={field.type === "number" ? "decimal" : undefined}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+    </label>
   );
 }
 
@@ -166,6 +275,15 @@ function PropertyEditor({
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+  const setDetail = (k: string, v: string | string[]) =>
+    setForm((f) => ({ ...f, details: { ...f.details, [k]: v } }));
+  const toggleModality = (m: Modality) =>
+    setForm((f) => ({
+      ...f,
+      modalities: f.modalities.includes(m)
+        ? f.modalities.filter((x) => x !== m)
+        : MODALITY_KEYS.filter((x) => x === m || f.modalities.includes(x)),
+    }));
 
   const save = async () => {
     setBusy("save");
@@ -205,17 +323,20 @@ function PropertyEditor({
         if (!res.ok) throw new Error(data.error);
         setForm((f) => ({
           ...f,
-          title: data.title || f.title,
-          operation: data.operation === "venta" ? "venta" : data.operation === "arriendo" ? "arriendo" : f.operation,
-          price: data.price || f.price,
-          sector: data.sector || f.sector,
-          address: data.address || f.address,
-          bedrooms: data.bedrooms?.toString() ?? f.bedrooms,
-          bathrooms: data.bathrooms?.toString() ?? f.bathrooms,
-          area_m2: data.area_m2?.toString() ?? f.area_m2,
+          title: f.title || data.title || "",
+          sector: f.sector || data.sector || "",
+          address: f.address || data.address || "",
+          bedrooms: f.bedrooms || (data.bedrooms?.toString() ?? ""),
+          bathrooms: f.bathrooms || (data.bathrooms?.toString() ?? ""),
+          area_m2: f.area_m2 || (data.area_m2?.toString() ?? ""),
+          modalities: MODALITY_KEYS.filter(
+            (m) => f.modalities.includes(m) || (data.modalities ?? []).includes(m),
+          ),
+          // Lo que ya escribió Fernanda tiene prioridad sobre lo leído del PDF.
+          details: { ...(data.details ?? {}), ...f.details },
           brief: [f.brief, data.brief].filter(Boolean).join("\n"),
         }));
-        setNotice("La IA leyó el PDF y completó la ficha. Revísala antes de guardar.");
+        setNotice("La IA leyó el PDF y completó lo que encontró. Revisa la ficha antes de guardar.");
       } catch (e) {
         setError((e as Error).message);
       } finally {
@@ -224,36 +345,43 @@ function PropertyEditor({
     } else {
       const text = await file.text();
       setForm((f) => ({ ...f, brief: [f.brief, text.trim()].filter(Boolean).join("\n") }));
-      setNotice("Texto agregado a la ficha.");
+      setNotice("Texto agregado a la información adicional.");
     }
   };
 
-  const field = (label: string, k: keyof FormState, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => (
-    <label className="block">
+  const basic = (
+    label: string,
+    k: "code" | "title" | "sector" | "address" | "bedrooms" | "bathrooms" | "area_m2",
+    span: 2 | 3 | 4 | 6,
+    placeholder?: string,
+  ) => (
+    <label className={`col-span-6 block ${SPAN[span]}`}>
       <span className="mb-1 block text-xs font-medium text-muted">{label}</span>
       <input
         className={inputClass}
-        value={form[k] as string}
-        onChange={(e) => set(k, e.target.value as never)}
-        {...props}
+        value={form[k]}
+        placeholder={placeholder}
+        onChange={(e) => set(k, e.target.value)}
       />
     </label>
   );
 
+  const sections = sectionsFor(form.modalities);
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
       <div
-        className="flex h-full w-full max-w-2xl flex-col bg-white shadow-xl"
+        className="flex h-full w-full max-w-3xl flex-col bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-line px-5 py-3">
-          <h2 className="font-semibold">{id ? `Editar ${initial.code}` : "Nueva propiedad"}</h2>
-          <button className="text-muted hover:text-ink" onClick={onClose}>
+          <h2 className="font-semibold">{id ? `Ficha ${initial.code}` : "Nueva propiedad"}</h2>
+          <button className="text-muted hover:text-ink" onClick={onClose} aria-label="Cerrar">
             ✕
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5">
           <div
             className="rounded-xl border border-dashed border-brand/40 bg-brand-soft/50 p-4 text-sm"
             onDragOver={(e) => e.preventDefault()}
@@ -263,15 +391,12 @@ function PropertyEditor({
               if (f) upload(f);
             }}
           >
-            <div className="font-medium text-brand">Subir brief de la propiedad</div>
+            <div className="font-medium text-brand">¿Tienes el brief en PDF?</div>
             <p className="text-xs text-muted">
-              Arrastra un PDF (la IA lo lee y completa los campos) o un archivo de texto (.txt, .md).
+              Arrástralo aquí y la IA completa la ficha por ti (solo los campos que estén vacíos).
+              También acepta .txt o .md.
             </p>
-            <Button
-              className="mt-2"
-              disabled={busy !== null}
-              onClick={() => fileRef.current?.click()}
-            >
+            <Button className="mt-2" disabled={busy !== null} onClick={() => fileRef.current?.click()}>
               {busy === "pdf" ? "Leyendo PDF…" : "Elegir archivo"}
             </Button>
             <input
@@ -287,48 +412,137 @@ function PropertyEditor({
             />
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
-            {field("Código *", "code", { placeholder: "REN-01" })}
-            {field("Título *", "title", { placeholder: "Depto 2D2B vista al mar, Reñaca" })}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium text-muted">Operación</span>
-              <select
-                className={inputClass}
-                value={form.operation}
-                onChange={(e) => set("operation", e.target.value as FormState["operation"])}
+          <section>
+            <h3 className="mb-2 text-sm font-semibold">1. Identificación</h3>
+            <div className="grid grid-cols-6 gap-3">
+              {basic("Código *", "code", 2, "REN-01")}
+              <div className="hidden sm:col-span-4 sm:block" />
+              {basic("Título *", "title", 6, "Depto 2D2B vista al mar, Reñaca")}
+              {basic("Sector / comuna", "sector", 3, "Reñaca")}
+              {basic("Dirección o referencia", "address", 3, "Av. Borgoño altura 15.000")}
+              {basic("Dormitorios", "bedrooms", 2)}
+              {basic("Baños", "bathrooms", 2)}
+              {basic("m² útiles", "area_m2", 2)}
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-sm font-semibold">2. Modalidades *</h3>
+            <p className="mb-2 text-xs text-muted">
+              Marca todas las que apliquen. Se abre una sección por cada una.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-4">
+              {MODALITY_KEYS.map((m) => {
+                const on = form.modalities.includes(m);
+                return (
+                  <button
+                    type="button"
+                    key={m}
+                    onClick={() => toggleModality(m)}
+                    className={`rounded-xl border p-3 text-left transition ${
+                      on ? "border-brand bg-brand-soft" : "border-line hover:border-brand/50"
+                    }`}
+                  >
+                    <div className="flex items-start gap-2 text-sm font-semibold leading-tight">
+                      <span
+                        className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded border text-[10px] ${
+                          on ? "border-brand bg-brand text-white" : "border-line"
+                        }`}
+                      >
+                        {on ? "✓" : ""}
+                      </span>
+                      {MODALITIES[m].label}
+                    </div>
+                    <div className="mt-1 pl-6 text-[11px] text-muted">{MODALITIES[m].hint}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {sections.map((section, i) => {
+            const total = section.fields.length;
+            const done = section.fields.filter((f) => {
+              const v = form.details[f.key];
+              return Array.isArray(v) ? v.length > 0 : Boolean(v);
+            }).length;
+            return (
+              <section
+                key={section.id}
+                className={section.modality ? "rounded-xl border border-line p-4" : ""}
               >
-                <option value="arriendo">Arriendo</option>
-                <option value="venta">Venta</option>
-              </select>
-            </label>
-            {field("Precio", "price", { placeholder: "$750.000 + GC  /  UF 9.800" })}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {field("Sector / comuna", "sector")}
-            {field("Dirección o referencia", "address")}
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            {field("Dormitorios", "bedrooms", { inputMode: "numeric" })}
-            {field("Baños", "bathrooms", { inputMode: "numeric" })}
-            {field("m²", "area_m2", { inputMode: "decimal" })}
-          </div>
-          <label className="block">
-            <span className="mb-1 block text-xs font-medium text-muted">
-              Ficha para la IA: todo lo que pueda preguntar un cliente
-            </span>
-            <textarea
-              className={`${inputClass} min-h-[220px] font-mono text-[13px] leading-relaxed`}
-              value={form.brief}
-              placeholder={"Gastos comunes aprox. $120.000\nIncluye estacionamiento y bodega\nSe aceptan mascotas pequeñas\nRequisitos: …\nDisponible desde …\nVisitas: …"}
-              onChange={(e) => set("brief", e.target.value)}
-            />
-          </label>
-          {field("IDs de avisos de Meta vinculados (separados por coma)", "ad_ids", {
-            placeholder: "120210000000000001, 120210000000000002",
+                <div className="mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-semibold">
+                    {i + 3}. {section.title}
+                  </h3>
+                  {section.modality && <ModalityPills modalities={[section.modality]} />}
+                  <span className="ml-auto text-[11px] text-muted">
+                    {done} de {total}
+                  </span>
+                </div>
+                <div className="grid grid-cols-6 gap-3">
+                  {section.fields.map((f) => (
+                    <FieldInput
+                      key={f.key}
+                      field={f}
+                      value={form.details[f.key]}
+                      onChange={(v) => setDetail(f.key, v)}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
           })}
-          {field("Links (portal, fotos, tour 360)", "links")}
+
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold">{sections.length + 3}. Información adicional</h3>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-muted">
+                Todo lo que no calce arriba y preguntas frecuentes (la IA lo usa)
+              </span>
+              <textarea
+                className={`${inputClass} min-h-[110px]`}
+                value={form.brief}
+                placeholder={"¿Se puede pintar? Sí, con autorización.\n¿Hay ruido? Calle tranquila, sin locales nocturnos."}
+                onChange={(e) => set("brief", e.target.value)}
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-muted">
+                IDs de avisos de Meta vinculados (separados por coma)
+              </span>
+              <input
+                className={inputClass}
+                value={form.ad_ids}
+                placeholder="120210000000000001, 120210000000000002"
+                onChange={(e) => set("ad_ids", e.target.value)}
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-muted">
+                Links para compartir (portal, fotos, tour 360)
+              </span>
+              <input
+                className={inputClass}
+                value={form.links}
+                onChange={(e) => set("links", e.target.value)}
+              />
+            </label>
+          </section>
+
+          <section className="rounded-xl bg-[#f4f4f2] p-4">
+            <h3 className="text-sm font-semibold">Notas privadas</h3>
+            <p className="mb-2 text-xs text-muted">
+              Solo para ti: la IA nunca las ve. Por ejemplo, el precio mínimo del propietario, la
+              comisión o el contacto del dueño.
+            </p>
+            <textarea
+              className={`${inputClass} min-h-[80px]`}
+              value={form.private_notes}
+              onChange={(e) => set("private_notes", e.target.value)}
+            />
+          </section>
+
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"

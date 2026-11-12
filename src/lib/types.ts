@@ -1,3 +1,5 @@
+import type { Details, Modality } from "./ficha";
+
 export type Channel = "whatsapp" | "instagram" | "messenger";
 
 export type ConversationStatus =
@@ -17,15 +19,19 @@ export interface Property {
   /** Código corto que aparece en avisos y publicaciones, p. ej. "REN-01". */
   code: string;
   title: string;
-  operation: "venta" | "arriendo";
-  price: string;
+  /** Modalidades en que se ofrece: Airbnb, año corrido, marzo a diciembre, venta. */
+  modalities: Modality[];
   sector: string;
   address: string;
   bedrooms: number | null;
   bathrooms: number | null;
   area_m2: number | null;
-  /** Ficha libre: todo lo que la IA puede usar para responder. */
+  /** Campos estructurados de la ficha base (ver lib/ficha.ts). */
+  details: Details;
+  /** Información adicional y preguntas frecuentes, en texto libre. */
   brief: string;
+  /** Notas privadas de Fernanda. La IA NO las recibe. */
+  private_notes: string;
   /** IDs de avisos de Meta o publicaciones vinculadas a esta propiedad. */
   ad_ids: string[];
   links: string;

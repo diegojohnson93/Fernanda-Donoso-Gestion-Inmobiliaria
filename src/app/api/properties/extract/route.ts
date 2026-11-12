@@ -1,4 +1,5 @@
 import { extractPropertyFromPdf } from "@/lib/ai";
+import { normalizeDetails, normalizeModalities } from "@/lib/ficha";
 import { errorResponse } from "@/lib/http";
 
 export const maxDuration = 60;
@@ -13,7 +14,12 @@ export async function POST(request: Request) {
       return errorResponse(new Error("El PDF supera 4 MB. Prueba con una versión más liviana."), 400);
     }
     const base64 = Buffer.from(await file.arrayBuffer()).toString("base64");
-    return Response.json(await extractPropertyFromPdf(base64));
+    const data = await extractPropertyFromPdf(base64);
+    return Response.json({
+      ...data,
+      modalities: normalizeModalities(data.modalities),
+      details: normalizeDetails(data.details),
+    });
   } catch (e) {
     return errorResponse(e);
   }

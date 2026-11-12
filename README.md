@@ -9,8 +9,12 @@ La IA nunca envía nada sola.
 
 - **Bandeja unificada**: filtros por canal y estado, búsqueda, y un aviso con el tiempo que
   queda de la ventana de 24 h para responder.
-- **Fichas de propiedades**: cada una con un código (p. ej. `REN-01`) y un texto libre con
-  todo lo que un cliente podría preguntar. Al subir un **PDF**, la IA lo lee y completa la ficha.
+- **Ficha base de propiedades**: se llena una vez por propiedad. Tiene un código (p. ej.
+  `REN-01`), una o más **modalidades** (Arriendo Airbnb, Arriendo año corrido, Arriendo marzo
+  a diciembre, Venta) y una sección de campos para cada modalidad elegida. Al subir un
+  **PDF**, la IA lo lee y completa los campos vacíos. Incluye **notas privadas** que la IA
+  nunca ve (precio mínimo del dueño, comisión, etc.). Los campos se definen en
+  [`src/lib/ficha.ts`](src/lib/ficha.ts): agregar uno nuevo es sumar una línea ahí.
 - **Detección de la propiedad**, en este orden:
   1. Lo que Fernanda eligió a mano (siempre manda).
   2. El **aviso de Meta** desde donde escribió el cliente (IDs vinculados en la ficha).
@@ -65,6 +69,10 @@ Cada cambio que se suba a GitHub se publica solo.
    en Vercel como `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`. Redeploy.
 
 > La base parte vacía: crea las propiedades reales desde la pestaña **Propiedades**.
+
+**Actualizaciones de la base:** si la base se creó con una versión anterior de `schema.sql`,
+ejecuta en el SQL Editor los archivos de [`supabase/migrations/`](supabase/migrations) que
+aún no hayas corrido, en orden. Una base creada con el `schema.sql` actual no los necesita.
 
 ## Conectar WhatsApp, Instagram y Messenger (Meta)
 
