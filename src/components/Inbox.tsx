@@ -131,8 +131,8 @@ export function Inbox() {
               </button>
             ))}
           </div>
-          <div className="flex gap-1">
-            {(["todos", "whatsapp", "instagram", "messenger"] as const).map((ch) => (
+          <div className="flex flex-wrap gap-1">
+            {(["todos", "whatsapp", "instagram", "messenger", "web"] as const).map((ch) => (
               <button
                 key={ch}
                 onClick={() => setChannel(ch)}
@@ -176,7 +176,9 @@ export function Inbox() {
                     {last?.text}
                   </p>
                   <div className="mt-1.5 flex flex-wrap items-center gap-1">
-                    {prop ? (
+                    {c.referral_text?.startsWith("Captación") ? (
+                      <Pill className="bg-[#efe9f8] text-[#5b3f99]">Propietario</Pill>
+                    ) : prop ? (
                       <Pill className="bg-[#eef0f2] text-ink">{prop.code}</Pill>
                     ) : (
                       <Pill className={CONFIDENCE.baja.className}>¿Qué propiedad?</Pill>
@@ -298,7 +300,24 @@ function ConversationView({
       );
     });
 
-  const send = () =>
+  const isWeb = convo.channel === "web";
+  const waNumber = (() => {
+    const d = (convo.contact_phone ?? "").replace(/\D/g, "");
+    if (!d) return null;
+    return d.length === 9 && d.startsWith("9") ? `56${d}` : d;
+  })();
+
+  /** Formularios web: se abre WhatsApp o el correo de Fernanda con el texto, y se registra. */
+  const replyOutside = (via: "whatsapp" | "correo") => {
+    const url =
+      via === "whatsapp"
+        ? `https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`
+        : `mailto:${convo.contact_email}?subject=${encodeURIComponent("Tu consulta a Fernanda Donoso Gestión Inmobiliaria")}&body=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+    send(via);
+  };
+
+  const send = (via?: "whatsapp" | "correo") =>
     run("send", async () => {
       const res = await api<{
         result: { status: string; error?: string };
@@ -312,7 +331,9 @@ function ConversationView({
       else {
         setText("");
         setNotice(
-          res.result.status === "simulado"
+          res.result.status === "manual"
+            ? `Respuesta registrada. Termina de enviarla desde ${via === "correo" ? "tu correo" : "WhatsApp"}.`
+            : res.result.status === "simulado"
             ? "Respuesta registrada (envío simulado: este canal aún no está conectado o es una conversación de prueba)."
             : `Enviado por ${CHANNELS[convo.channel].label}.`,
         );
@@ -340,7 +361,7 @@ function ConversationView({
           </button>
           <ChannelBadge channel={convo.channel} full />
           <span className="font-semibold">{convo.contact_name}</span>
-          {left !== null && (
+          {left !== null && !isWeb && (
             <Pill
               className={
                 left <= 0
@@ -397,6 +418,7 @@ function ConversationView({
                 >
                   {clock(m.created_at)}
                   {m.send_status === "simulado" && " · simulado"}
+                  {m.send_status === "manual" && " · respondido fuera de la app"}
                   {m.send_status === "error" && " · error al enviar"}
                 </div>
               </div>
@@ -414,7 +436,11 @@ function ConversationView({
                   ? "Borrador de la IA"
                   : "Borrador (plantilla, IA sin configurar)"}
               </span>
-              {draft.property_code ? (
+              {convo.referral_text?.startsWith("Captación") ? (
+                <Pill className="bg-[#efe9f8] text-[#5b3f99]">
+                  Captación: quiere arrendar o vender con Fernanda
+                </Pill>
+              ) : draft.property_code ? (
                 <Pill className={CONFIDENCE[draft.confidence].className}>
                   {draft.property_code} · {CONFIDENCE[draft.confidence].label.toLowerCase()}
                 </Pill>
@@ -447,9 +473,32 @@ function ConversationView({
           {error && <p className="mt-1 text-xs text-bad">{error}</p>}
           {notice && <p className="mt-1 text-xs text-ok">{notice}</p>}
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Button variant="primary" disabled={!text.trim() || busy !== null} onClick={send}>
-              {busy === "send" ? "Enviando…" : draft ? "Aprobar y enviar" : "Enviar"}
-            </Button>
+            {isWeb ? (
+              <>
+                {waNumber && (
+                  <Button
+                    variant="primary"
+                    disabled={!text.trim() || busy !== null}
+                    onClick={() => replyOutside("whatsapp")}
+                  >
+                    Responder por WhatsApp
+                  </Button>
+                )}
+                {convo.contact_email && (
+                  <Button
+                    variant={waNumber ? "secondary" : "primary"}
+                    disabled={!text.trim() || busy !== null}
+                    onClick={() => replyOutside("correo")}
+                  >
+                    Responder por correo
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Button variant="primary" disabled={!text.trim() || busy !== null} onClick={() => send()}>
+                {busy === "send" ? "Enviando…" : draft ? "Aprobar y enviar" : "Enviar"}
+              </Button>
+            )}
             <Button disabled={busy !== null} onClick={regenerate}>
               {busy === "draft" ? "Pensando…" : draft ? "Regenerar" : "Sugerir respuesta con IA"}
             </Button>
@@ -511,6 +560,7 @@ function ConversationView({
             {convo.property_source === "codigo" &&
               "Detectada por el código que escribió el cliente."}
             {convo.property_source === "ia" && "Deducida por la IA a partir de la conversación."}
+            {convo.property_source === "web" && "Consultó desde la página de esta propiedad en la web."}
             {!convo.property_source && "Si la eliges aquí, la IA responderá con esa ficha."}
           </p>
         </div>
@@ -578,6 +628,8 @@ function ConversationView({
 
         <div className="text-xs text-muted">
           <div>Canal: {CHANNELS[convo.channel].label}</div>
+          {convo.contact_phone && <div>Teléfono: {convo.contact_phone}</div>}
+          {convo.contact_email && <div>Correo: {convo.contact_email}</div>}
           <div>ID: {convo.external_id}</div>
           <div>Primer contacto: {clock(convo.created_at)}</div>
         </div>
@@ -634,7 +686,7 @@ function SimulateDialog({
           </p>
         </div>
         <div className="flex gap-1">
-          {(Object.keys(CHANNELS) as Channel[]).map((ch) => (
+          {(["whatsapp", "instagram", "messenger"] as Channel[]).map((ch) => (
             <button
               key={ch}
               onClick={() => setChannel(ch)}

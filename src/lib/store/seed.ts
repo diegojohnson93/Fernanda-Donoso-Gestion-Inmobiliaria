@@ -8,11 +8,21 @@ export function buildSeed(): {
 } {
   const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
 
-  const base = { links: "", active: true, private_notes: "", photos: [] };
+  const base = {
+    links: "",
+    active: true,
+    private_notes: "",
+    photos: [],
+    published: true,
+    featured: false,
+    show_address: false,
+    web_description: "",
+  };
   const properties: Property[] = [
     {
       ...base,
       id: "p-ren01",
+      featured: true,
       code: "REN-01",
       title: "Depto 2D2B con vista al mar, Reñaca",
       modalities: ["anual", "airbnb"],

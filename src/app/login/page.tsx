@@ -19,7 +19,7 @@ export default function LoginPage() {
       body: JSON.stringify({ password }),
     });
     if (res.ok) {
-      router.push("/");
+      router.push("/admin");
       router.refresh();
     } else {
       setError("Contraseña incorrecta");

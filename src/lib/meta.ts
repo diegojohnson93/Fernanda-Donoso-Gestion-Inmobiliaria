@@ -10,11 +10,12 @@ import type { Conversation, IncomingMessage } from "./types";
 const GRAPH = () => `https://graph.facebook.com/${process.env.META_GRAPH_VERSION || "v23.0"}`;
 
 export interface SendResult {
-  status: "enviado" | "simulado" | "error";
+  status: "enviado" | "simulado" | "manual" | "error";
   error?: string;
 }
 
 export function channelConfigured(channel: Conversation["channel"]): boolean {
+  if (channel === "web") return false;
   if (channel === "whatsapp") {
     return Boolean(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
   }
@@ -22,6 +23,8 @@ export function channelConfigured(channel: Conversation["channel"]): boolean {
 }
 
 export async function sendToChannel(convo: Conversation, text: string): Promise<SendResult> {
+  // Formularios web: Fernanda responde desde su WhatsApp o correo; aquí solo se registra.
+  if (convo.channel === "web") return { status: "manual" };
   // Conversaciones de prueba (simulador / datos demo) o canal sin credenciales.
   if (convo.external_id.startsWith("sim-") || !channelConfigured(convo.channel)) {
     return { status: "simulado" };

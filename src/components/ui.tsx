@@ -10,6 +10,7 @@ export const CHANNELS: Record<Channel, { label: string; short: string; className
   whatsapp: { label: "WhatsApp", short: "WA", className: "bg-[#e3f4ea] text-[#1f7a46]" },
   instagram: { label: "Instagram", short: "IG", className: "bg-[#f9e6ef] text-[#a8326b]" },
   messenger: { label: "Messenger", short: "FB", className: "bg-[#e5eefb] text-[#2b5ea8]" },
+  web: { label: "Web", short: "WEB", className: "bg-[#eef0f2] text-ink" },
 };
 
 export const STATUSES: Record<ConversationStatus, { label: string; className: string }> = {
@@ -109,8 +110,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   const nav = [
-    { href: "/", label: "Bandeja" },
-    { href: "/propiedades", label: "Propiedades" },
+    { href: "/admin", label: "Bandeja" },
+    { href: "/admin/propiedades", label: "Propiedades" },
   ];
 
   return (
@@ -127,7 +128,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <nav className="flex gap-1">
           {nav.map((n) => {
-            const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
+            const active = n.href === "/admin" ? pathname === "/admin" : pathname.startsWith(n.href);
             return (
               <Link
                 key={n.href}
@@ -152,7 +153,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Pill className={status.ai ? "bg-[#e7f3ec] text-ok" : "bg-[#eceef0] text-muted"}>
                 {status.ai ? "IA conectada" : "IA sin configurar (borradores de plantilla)"}
               </Pill>
-              {(Object.keys(status.channels) as Channel[]).map((ch) => (
+              {(["whatsapp", "messenger", "instagram"] as Channel[]).map((ch) => (
                 <span
                   key={ch}
                   title={status.channels[ch] ? `${CHANNELS[ch].label} conectado` : `${CHANNELS[ch].label} sin conectar: envíos simulados`}

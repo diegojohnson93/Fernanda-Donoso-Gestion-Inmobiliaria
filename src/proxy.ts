@@ -1,13 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { authEnabled, SESSION_COOKIE, sessionToken } from "@/lib/auth";
 
+/** APIs que el público o Meta pueden llamar sin contraseña. */
+const PUBLIC_API = ["/api/login", "/api/webhooks/", "/api/public/"];
+
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (PUBLIC_API.some((p) => pathname.startsWith(p))) return NextResponse.next();
   if (!authEnabled()) return NextResponse.next();
 
   const cookie = request.cookies.get(SESSION_COOKIE)?.value;
   if (cookie && cookie === (await sessionToken())) return NextResponse.next();
 
-  if (request.nextUrl.pathname.startsWith("/api/")) {
+  if (pathname.startsWith("/api/")) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
   const url = request.nextUrl.clone();
@@ -16,8 +21,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Todo menos: login, webhook de Meta, política de privacidad y archivos estáticos.
-  matcher: [
-    "/((?!login|privacidad|api/login|api/webhooks|_next/static|_next/image|favicon.ico).*)",
-  ],
+  // Solo se protege el panel de Fernanda y sus APIs. La web pública queda abierta.
+  matcher: ["/admin/:path*", "/api/:path*"],
 };

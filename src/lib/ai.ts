@@ -60,10 +60,10 @@ export function detectProperty(
   // arrendó o vendió, la IA debe saberlo para avisarle y ofrecer alternativas.
   const active = properties;
 
-  // 1. Selección manual de Fernanda: manda siempre.
-  if (convo.property_source === "manual" && convo.property_id) {
+  // 1. Selección manual de Fernanda, o propiedad desde la que se envió el formulario web.
+  if ((convo.property_source === "manual" || convo.property_source === "web") && convo.property_id) {
     const p = properties.find((x) => x.id === convo.property_id) ?? null;
-    if (p) return { property: p, source: "manual", confidence: "alta" };
+    if (p) return { property: p, source: convo.property_source, confidence: "alta" };
   }
 
   // 2. Llegó desde un aviso o publicación vinculada.
@@ -91,12 +91,14 @@ export function detectProperty(
 /* ------------------------------------------------------------------------ */
 
 /** Ficha tal como la recibe la IA. Las notas privadas NUNCA se incluyen. */
-function propertyCard(p: Property): string {
+function propertyCard(p: Property, opts: { hideAddress?: boolean } = {}): string {
   return [
     `### ${p.code} — ${p.title}`,
     `Modalidades: ${p.modalities.map((m) => MODALITIES[m].label).join(", ")}`,
     `Precios: ${priceLines(p.modalities, p.details).map((l) => `${MODALITIES[l.modality].short}: ${l.text}`).join(" | ")}`,
-    `Sector: ${p.sector || "?"} | Dirección: ${p.address || "?"}`,
+    opts.hideAddress
+      ? `Sector: ${p.sector || "?"}`
+      : `Sector: ${p.sector || "?"} | Dirección: ${p.address || "?"}`,
     `Dormitorios: ${p.bedrooms ?? "?"} | Baños: ${p.bathrooms ?? "?"} | Superficie útil: ${p.area_m2 ?? "?"} m²`,
     detailsToText(p.modalities, p.details),
     p.brief ? `[Información adicional]\n${p.brief}` : "",
@@ -106,13 +108,28 @@ function propertyCard(p: Property): string {
     .join("\n");
 }
 
-const CHANNEL_LABEL = { whatsapp: "WhatsApp", instagram: "Instagram", messenger: "Facebook Messenger" };
+const CHANNEL_LABEL = {
+  whatsapp: "WhatsApp",
+  instagram: "Instagram",
+  messenger: "Facebook Messenger",
+  web: "formulario de la web (Fernanda responderá por WhatsApp o correo)",
+};
+
+/** Formulario "¿Tienes una propiedad?": un dueño que quiere arrendar o vender con Fernanda. */
+export const OWNER_LEAD = "Captación de propietario";
+const isOwnerLead = (c: { referral_text: string | null }) =>
+  Boolean(c.referral_text?.startsWith(OWNER_LEAD));
 
 export async function generateDraft(
   convo: ConversationWithMessages,
   properties: Property[],
 ): Promise<{ draft: Draft; detection: Detection }> {
   const detection = detectProperty(convo, properties);
+
+  if (isOwnerLead(convo)) {
+    // Un propietario no pregunta por las propiedades publicadas.
+    return { draft: await ownerLeadDraft(convo), detection: { property: null, source: null, confidence: null } };
+  }
 
   if (!aiEnabled()) {
     return { draft: templateDraft(convo, detection, properties), detection };
@@ -147,7 +164,7 @@ Responde ÚNICAMENTE con un objeto JSON:
 
   const inactive = properties.filter((p) => !p.active);
   const user = `Fichas de propiedades disponibles:
-${active.map(propertyCard).join("\n\n") || "(no hay fichas cargadas)"}
+${active.map((p) => propertyCard(p)).join("\n\n") || "(no hay fichas cargadas)"}
 ${
   inactive.length
     ? `\nPropiedades que YA NO ESTÁN DISPONIBLES (arrendadas, vendidas o retiradas):\n${inactive.map((p) => `- ${p.code} — ${p.title} (${p.sector})`).join("\n")}\n`
@@ -200,9 +217,7 @@ function templateDraft(
   detection: Detection,
   properties: Property[],
 ): Draft {
-  const generic = /^(\+|Usuario )/.test(convo.contact_name);
-  const first = generic ? "" : convo.contact_name.replace(/^@/, "").split(/[ ._]/)[0];
-  const name = first ? first.charAt(0).toUpperCase() + first.slice(1) : "";
+  const name = firstName(convo.contact_name);
   const p = detection.property;
   if (!p) {
     const options = properties
@@ -243,11 +258,77 @@ function templateDraft(
         ? "La conversación llegó desde un aviso vinculado a esta propiedad."
         : detection.source === "codigo"
           ? `El cliente mencionó el código ${p.code}.`
-          : "Propiedad asignada manualmente.",
+          : detection.source === "web"
+            ? "Consultó desde la página de la propiedad en la web."
+            : "Propiedad asignada manualmente.",
     missing_info: [],
     generated_at: new Date().toISOString(),
     engine: "plantilla",
   };
+}
+
+/* ------------------------------------------------------------------------ */
+/* Captación de propietarios                                                 */
+/* ------------------------------------------------------------------------ */
+
+async function ownerLeadDraft(convo: ConversationWithMessages): Promise<Draft> {
+  const name = firstName(convo.contact_name);
+  const base: Omit<Draft, "text" | "engine"> = {
+    property_code: null,
+    confidence: "alta",
+    reasoning: "Propietario que quiere arrendar o vender su propiedad con Fernanda.",
+    missing_info: [],
+    generated_at: new Date().toISOString(),
+  };
+  if (!aiEnabled()) {
+    return {
+      ...base,
+      engine: "plantilla",
+      text: `¡Hola${name ? " " + name : ""}! Muchas gracias por pensar en nosotros para tu propiedad. Me encantaría conocerla: ¿te parece si coordinamos una llamada o una visita para evaluarla y contarte cómo trabajamos?`,
+    };
+  }
+  const history = convo.messages
+    .slice(-10)
+    .map((m) => `${m.direction === "in" ? "PROPIETARIO" : AGENT().toUpperCase()}: ${m.text}`)
+    .join("\n");
+  const raw = await callClaude({
+    max_tokens: 600,
+    system: `Eres el asistente de ${BUSINESS()}, corredora de propiedades en Chile. Redactas BORRADORES que ${AGENT()} revisa antes de enviar por WhatsApp o correo. Esta persona es un PROPIETARIO que quiere que ${AGENT()} arriende o venda su propiedad. Agradece, muestra interés, haz como máximo 2 preguntas clave que falten (sector, tipo de propiedad, modalidad: venta, arriendo año corrido, marzo a diciembre o Airbnb) y propone coordinar una llamada o visita de evaluación. No ofrezcas propiedades del listado ni des precios ni comisiones. Español de Chile, cordial, 2 a 4 frases. Responde SOLO con el texto del mensaje.`,
+    messages: [{ role: "user", content: `Nombre: ${convo.contact_name}\n${history}` }],
+  });
+  return { ...base, engine: "ia", text: raw.trim() };
+}
+
+function firstName(contact: string) {
+  if (/^(\+|Usuario )/.test(contact)) return "";
+  const first = contact.replace(/^@/, "").split(/[ ._]/)[0];
+  return first ? first.charAt(0).toUpperCase() + first.slice(1) : "";
+}
+
+/* ------------------------------------------------------------------------ */
+/* Descripción para la web                                                   */
+/* ------------------------------------------------------------------------ */
+
+export async function writeWebDescription(p: PropertyInput): Promise<string> {
+  if (!aiEnabled()) {
+    throw new Error("Para redactar con IA se necesita configurar ANTHROPIC_API_KEY.");
+  }
+  const card = propertyCard({ ...p, id: "", created_at: "" } as Property, {
+    hideAddress: !p.show_address,
+  });
+  const raw = await callClaude({
+    max_tokens: 900,
+    system: `Eres redactor inmobiliario en Chile. Escribes la descripción de una propiedad para la web de ${BUSINESS()}.
+Reglas:
+- 2 o 3 párrafos breves (máximo 120 palabras en total), tono cálido y profesional, español de Chile.
+- Destaca lo que hace atractiva la propiedad (vista, luz, ubicación, espacios, amenidades) y para quién es ideal.
+- Usa SOLO datos de la ficha. No inventes nada. No repitas precios ni requisitos (la web ya los muestra aparte).
+- No incluyas la dirección exacta salvo que la ficha la entregue.
+- Sin títulos, sin listas, sin emojis, sin signos de exclamación exagerados.
+Responde SOLO con el texto.`,
+    messages: [{ role: "user", content: card }],
+  });
+  return raw.trim();
 }
 
 /* ------------------------------------------------------------------------ */

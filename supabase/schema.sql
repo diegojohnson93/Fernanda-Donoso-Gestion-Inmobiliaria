@@ -18,6 +18,10 @@ create table if not exists properties (
   brief text not null default '',
   private_notes text not null default '',
   photos jsonb not null default '[]',
+  published boolean not null default false,
+  featured boolean not null default false,
+  show_address boolean not null default false,
+  web_description text not null default '',
   ad_ids text[] not null default '{}',
   links text not null default '',
   active boolean not null default true,
@@ -26,11 +30,13 @@ create table if not exists properties (
 
 create table if not exists conversations (
   id uuid primary key default gen_random_uuid(),
-  channel text not null check (channel in ('whatsapp', 'instagram', 'messenger')),
+  channel text not null check (channel in ('whatsapp', 'instagram', 'messenger', 'web')),
   external_id text not null,
   contact_name text not null default '',
+  contact_phone text,
+  contact_email text,
   property_id uuid references properties(id) on delete set null,
-  property_source text check (property_source in ('aviso', 'codigo', 'ia', 'manual')),
+  property_source text check (property_source in ('aviso', 'codigo', 'ia', 'manual', 'web')),
   property_confidence text check (property_confidence in ('alta', 'media', 'baja')),
   status text not null default 'nuevo'
     check (status in ('nuevo', 'respondido', 'visita', 'cerrado', 'descartado')),
@@ -50,7 +56,7 @@ create table if not exists messages (
   direction text not null check (direction in ('in', 'out')),
   text text not null,
   created_at timestamptz not null default now(),
-  send_status text check (send_status in ('enviado', 'simulado', 'error')),
+  send_status text check (send_status in ('enviado', 'simulado', 'manual', 'error')),
   send_error text
 );
 

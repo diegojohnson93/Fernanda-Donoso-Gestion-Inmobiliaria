@@ -28,6 +28,10 @@ type FormState = {
   brief: string;
   private_notes: string;
   photos: Photo[];
+  published: boolean;
+  featured: boolean;
+  show_address: boolean;
+  web_description: string;
   ad_ids: string;
   links: string;
   active: boolean;
@@ -46,6 +50,10 @@ const empty: FormState = {
   brief: "",
   private_notes: "",
   photos: [],
+  published: false,
+  featured: false,
+  show_address: false,
+  web_description: "",
   ad_ids: "",
   links: "",
   active: true,
@@ -64,6 +72,10 @@ const toForm = (p: Property): FormState => ({
   brief: p.brief,
   private_notes: p.private_notes ?? "",
   photos: p.photos ?? [],
+  published: Boolean(p.published),
+  featured: Boolean(p.featured),
+  show_address: Boolean(p.show_address),
+  web_description: p.web_description ?? "",
   ad_ids: p.ad_ids.join(", "),
   links: p.links,
   active: p.active,
@@ -172,6 +184,9 @@ export function Properties() {
                   </span>
                   <ModalityPills modalities={p.modalities ?? []} />
                   {!p.active && <Pill className="bg-[#f8e5e3] text-bad">No disponible</Pill>}
+                {p.active && p.published && (
+                  <Pill className="bg-[#e7f3ec] text-ok">En la web{p.featured ? " ★" : ""}</Pill>
+                )}
                 </div>
                 <div className="mt-2 font-semibold leading-snug">{p.title}</div>
                 <div className="mt-1 space-y-0.5 text-sm text-muted">
@@ -217,6 +232,42 @@ export function Properties() {
         />
       )}
     </div>
+  );
+}
+
+function Toggle({
+  checked,
+  onChange,
+  label,
+  hint,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  hint: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`flex items-start gap-2.5 rounded-lg border p-3 text-left ${
+        checked ? "border-brand bg-brand-soft" : "border-line"
+      }`}
+    >
+      <span
+        className={`mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition ${
+          checked ? "bg-brand" : "bg-[#cfd4d9]"
+        }`}
+      >
+        <span
+          className={`h-4 w-4 rounded-full bg-white shadow transition ${checked ? "translate-x-4" : ""}`}
+        />
+      </span>
+      <span>
+        <span className="block text-sm font-medium leading-tight">{label}</span>
+        <span className="block text-[11px] text-muted">{hint}</span>
+      </span>
+    </button>
   );
 }
 
@@ -314,7 +365,7 @@ function PropertyEditor({
   onSaved: () => void;
 }) {
   const [form, setForm] = useState<FormState>(initial);
-  const [busy, setBusy] = useState<null | "save" | "pdf" | "delete" | "photos">(null);
+  const [busy, setBusy] = useState<null | "save" | "pdf" | "delete" | "photos" | "describe">(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -345,6 +396,31 @@ function PropertyEditor({
       onSaved();
     } catch (e) {
       setError((e as Error).message);
+      setBusy(null);
+    }
+  };
+
+  const describe = async () => {
+    if (
+      form.web_description.trim() &&
+      !confirm("¿Reemplazar la descripción actual por una nueva redactada por la IA?")
+    )
+      return;
+    setBusy("describe");
+    setError(null);
+    try {
+      const res = await fetch("/api/properties/describe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      set("web_description", data.text);
+      setNotice("Descripción redactada. Revísala y ajústala antes de guardar.");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
       setBusy(null);
     }
   };
@@ -597,6 +673,52 @@ function PropertyEditor({
                 onChange={(e) => set("links", e.target.value)}
               />
             </label>
+          </section>
+
+          <section className="rounded-xl border border-line p-4">
+            <h3 className="text-sm font-semibold">{sections.length + 5}. Web pública</h3>
+            <p className="mb-3 text-xs text-muted">
+              Cómo aparece esta propiedad en la web. Las notas privadas nunca se publican.
+            </p>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <Toggle
+                checked={form.published}
+                onChange={(v) => set("published", v)}
+                label="Publicar en la web"
+                hint={form.active ? "Visible para cualquiera" : "No se verá mientras no esté disponible"}
+              />
+              <Toggle
+                checked={form.featured}
+                onChange={(v) => set("featured", v)}
+                label="Destacada"
+                hint="Aparece en la portada"
+              />
+              <Toggle
+                checked={form.show_address}
+                onChange={(v) => set("show_address", v)}
+                label="Mostrar dirección exacta"
+                hint="Si no, solo se muestra el sector"
+              />
+            </div>
+            <div className="mt-3">
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <span className="text-xs font-medium text-muted">Descripción para la web</span>
+                <Button
+                  variant="ghost"
+                  className="!px-2 !py-1 text-xs"
+                  disabled={busy !== null}
+                  onClick={describe}
+                >
+                  {busy === "describe" ? "Redactando…" : "✦ Redactar con IA"}
+                </Button>
+              </div>
+              <textarea
+                className={`${inputClass} min-h-[120px]`}
+                value={form.web_description}
+                placeholder="Un texto atractivo de 2 o 3 párrafos. Llena la ficha y usa “Redactar con IA” para un primer borrador."
+                onChange={(e) => set("web_description", e.target.value)}
+              />
+            </div>
           </section>
 
           <section className="rounded-xl bg-[#f4f4f2] p-4">

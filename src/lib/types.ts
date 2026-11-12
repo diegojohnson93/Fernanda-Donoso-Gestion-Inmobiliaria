@@ -1,6 +1,6 @@
 import type { Details, Modality } from "./ficha";
 
-export type Channel = "whatsapp" | "instagram" | "messenger";
+export type Channel = "whatsapp" | "instagram" | "messenger" | "web";
 
 export type ConversationStatus =
   | "nuevo"
@@ -12,7 +12,7 @@ export type ConversationStatus =
 export type Confidence = "alta" | "media" | "baja";
 
 /** Cómo se determinó la propiedad de una conversación. */
-export type PropertySource = "aviso" | "codigo" | "ia" | "manual";
+export type PropertySource = "aviso" | "codigo" | "ia" | "manual" | "web";
 
 export interface Photo {
   /** Ruta dentro del almacenamiento (se usa para borrarla). */
@@ -42,6 +42,14 @@ export interface Property {
   private_notes: string;
   /** Fotos en orden; la primera es la portada. */
   photos: Photo[];
+  /** Se muestra en la web pública. */
+  published: boolean;
+  /** Aparece en la portada de la web. */
+  featured: boolean;
+  /** Si es false, la web muestra solo el sector (recomendado). */
+  show_address: boolean;
+  /** Texto comercial para la web. */
+  web_description: string;
   /** IDs de avisos de Meta o publicaciones vinculadas a esta propiedad. */
   ad_ids: string[];
   links: string;
@@ -68,16 +76,20 @@ export interface Message {
   direction: "in" | "out";
   text: string;
   created_at: string;
-  send_status?: "enviado" | "simulado" | "error" | null;
+  /** "manual": respuesta a un formulario web, enviada por Fernanda desde su WhatsApp o correo. */
+  send_status?: "enviado" | "simulado" | "manual" | "error" | null;
   send_error?: string | null;
 }
 
 export interface Conversation {
   id: string;
   channel: Channel;
-  /** Teléfono (WhatsApp), PSID (Messenger) o IGSID (Instagram). */
+  /** Teléfono (WhatsApp), PSID (Messenger), IGSID (Instagram) o web:<teléfono/correo>. */
   external_id: string;
   contact_name: string;
+  /** Datos dejados en el formulario web. */
+  contact_phone?: string | null;
+  contact_email?: string | null;
   property_id: string | null;
   property_source: PropertySource | null;
   property_confidence: Confidence | null;
@@ -99,6 +111,8 @@ export interface IncomingMessage {
   channel: Channel;
   external_id: string;
   contact_name?: string | null;
+  contact_phone?: string | null;
+  contact_email?: string | null;
   text: string;
   referral_ad_id?: string | null;
   referral_text?: string | null;

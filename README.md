@@ -5,6 +5,13 @@ Cada mensaje entrante recibe un **borrador de respuesta hecho por IA** con la fi
 propiedad por la que preguntan. Fernanda lo revisa, lo corrige si quiere y lo **aprueba**.
 La IA nunca envía nada sola.
 
+## Rutas
+
+- `/` — web pública (en construcción).
+- `/admin` — bandeja de mensajes (protegida con contraseña).
+- `/admin/propiedades` — fichas de propiedades.
+- `/api/public/contact` — formularios de la web (consulta y captación de propietarios), sin contraseña.
+
 ## Qué hace
 
 - **Bandeja unificada**: filtros por canal y estado, búsqueda, y un aviso con el tiempo que
@@ -26,6 +33,12 @@ La IA nunca envía nada sola.
      el borrador le pregunta al cliente por cuál propiedad consulta.
 - **Borradores honestos**: la IA solo usa la ficha. Lo que la ficha no dice lo marca como
   "falta en la ficha" en vez de inventarlo.
+- **Formularios de la web**: las consultas y los propietarios que quieren arrendar o vender
+  llegan a la bandeja como canal **Web**, con borrador de IA. Se responden con un clic desde el
+  WhatsApp o el correo de Fernanda. Tienen protección básica contra spam (campo trampa y límite
+  de envíos).
+- **Publicación en la web** desde la ficha: publicar, destacar en portada, mostrar u ocultar la
+  dirección exacta y descripción comercial con botón "Redactar con IA".
 - **Mini CRM**: estados (nuevo, respondido, visita agendada, cerrado, descartado) y notas
   internas, que la IA también lee.
 - **Simulador**: crea mensajes de prueba en cualquier canal para probar sin conectar Meta.

@@ -14,6 +14,8 @@ export async function ingestIncoming(msg: IncomingMessage): Promise<Conversation
       channel: msg.channel,
       external_id: msg.external_id,
       contact_name: msg.contact_name || defaultName(msg),
+      ...(msg.contact_phone ? { contact_phone: msg.contact_phone } : {}),
+      ...(msg.contact_email ? { contact_email: msg.contact_email } : {}),
       property_id: null,
       property_source: null,
       property_confidence: null,
@@ -48,6 +50,8 @@ export async function ingestIncoming(msg: IncomingMessage): Promise<Conversation
   if (msg.contact_name && convo.contact_name !== msg.contact_name) {
     patch.contact_name = msg.contact_name;
   }
+  if (msg.contact_phone) patch.contact_phone = msg.contact_phone;
+  if (msg.contact_email) patch.contact_email = msg.contact_email;
   return store.updateConversation(convo.id, patch);
 }
 
@@ -95,6 +99,7 @@ export async function approveAndSend(conversationId: string, text: string) {
 
 function defaultName(msg: IncomingMessage) {
   if (msg.channel === "whatsapp") return `+${msg.external_id.replace(/^\+/, "")}`;
+  if (msg.channel === "web") return "Contacto web";
   const tail = msg.external_id.slice(-4);
   return msg.channel === "instagram" ? `Usuario Instagram …${tail}` : `Usuario Facebook …${tail}`;
 }
