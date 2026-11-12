@@ -1,0 +1,255 @@
+import type {
+  Confidence,
+  ConversationWithMessages,
+  Draft,
+  Property,
+  PropertyInput,
+  PropertySource,
+} from "./types";
+
+const API_URL = "https://api.anthropic.com/v1/messages";
+const MODEL = () => process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5";
+const BUSINESS = () => process.env.BUSINESS_NAME || "Fernanda Donoso Gestión Inmobiliaria";
+const AGENT = () => process.env.AGENT_NAME || "Fernanda";
+
+export const aiEnabled = () => Boolean(process.env.ANTHROPIC_API_KEY);
+
+async function callClaude(body: Record<string, unknown>): Promise<string> {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": process.env.ANTHROPIC_API_KEY!,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({ model: MODEL(), ...body }),
+  });
+  if (!res.ok) {
+    throw new Error(`Error de la IA (${res.status}): ${(await res.text()).slice(0, 300)}`);
+  }
+  const data = (await res.json()) as { content: { type: string; text?: string }[] };
+  return data.content
+    .filter((b) => b.type === "text")
+    .map((b) => b.text)
+    .join("");
+}
+
+function parseJson<T>(raw: string): T {
+  const cleaned = raw.replace(/```(?:json)?/g, "").trim();
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  return JSON.parse(cleaned.slice(start, end + 1)) as T;
+}
+
+/* ------------------------------------------------------------------------ */
+/* Detección determinística de la propiedad (antes de llamar a la IA)       */
+/* ------------------------------------------------------------------------ */
+
+export interface Detection {
+  property: Property | null;
+  source: PropertySource | null;
+  confidence: Confidence | null;
+}
+
+export function detectProperty(
+  convo: ConversationWithMessages,
+  properties: Property[],
+): Detection {
+  const active = properties.filter((p) => p.active);
+
+  // 1. Selección manual de Fernanda: manda siempre.
+  if (convo.property_source === "manual" && convo.property_id) {
+    const p = properties.find((x) => x.id === convo.property_id) ?? null;
+    if (p) return { property: p, source: "manual", confidence: "alta" };
+  }
+
+  // 2. Llegó desde un aviso o publicación vinculada.
+  if (convo.referral_ad_id) {
+    const p = active.find((x) => x.ad_ids.includes(convo.referral_ad_id!));
+    if (p) return { property: p, source: "aviso", confidence: "alta" };
+  }
+
+  // 3. El cliente escribió un código (el más reciente gana).
+  const inbound = convo.messages.filter((m) => m.direction === "in").reverse();
+  for (const m of inbound) {
+    const text = m.text.toUpperCase().replace(/\s+/g, "");
+    const hit = active.find((p) => {
+      const code = p.code.toUpperCase();
+      return text.includes(code) || text.includes(code.replace("-", ""));
+    });
+    if (hit) return { property: hit, source: "codigo", confidence: "alta" };
+  }
+
+  return { property: null, source: null, confidence: null };
+}
+
+/* ------------------------------------------------------------------------ */
+/* Borrador de respuesta                                                     */
+/* ------------------------------------------------------------------------ */
+
+function propertyCard(p: Property): string {
+  return [
+    `### ${p.code} — ${p.title}`,
+    `Operación: ${p.operation} | Precio: ${p.price}`,
+    `Sector: ${p.sector} | Dirección: ${p.address}`,
+    `Dormitorios: ${p.bedrooms ?? "?"} | Baños: ${p.bathrooms ?? "?"} | Superficie: ${p.area_m2 ?? "?"} m²`,
+    p.links ? `Links: ${p.links}` : "",
+    "Ficha:",
+    p.brief,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+const CHANNEL_LABEL = { whatsapp: "WhatsApp", instagram: "Instagram", messenger: "Facebook Messenger" };
+
+export async function generateDraft(
+  convo: ConversationWithMessages,
+  properties: Property[],
+): Promise<{ draft: Draft; detection: Detection }> {
+  const detection = detectProperty(convo, properties);
+
+  if (!aiEnabled()) {
+    return { draft: templateDraft(convo, detection, properties), detection };
+  }
+
+  const active = properties.filter((p) => p.active);
+  const history = convo.messages
+    .slice(-20)
+    .map((m) => `${m.direction === "in" ? "CLIENTE" : AGENT().toUpperCase()}: ${m.text}`)
+    .join("\n");
+
+  const system = `Eres el asistente de ${BUSINESS()}, una corredora de propiedades en Chile. Redactas BORRADORES de respuesta que ${AGENT()} revisará y aprobará antes de enviarlos.
+
+Reglas:
+- Escribe en español de Chile, cordial, cercano y profesional. Mensajes breves, propios de ${CHANNEL_LABEL[convo.channel]}: 2 a 5 frases, sin listas largas. Puedes usar 1 emoji como máximo.
+- Usa SOLO la información de las fichas. Nunca inventes precios, disponibilidad, requisitos ni características.
+- Si el cliente pregunta algo que la ficha no dice, no lo supongas: di que lo confirmarás a la brevedad y agrégalo a "missing_info".
+- Identifica de qué propiedad habla el cliente. Si no puedes saberlo con seguridad, NO elijas una: pregunta amablemente por cuál consulta (código del aviso, sector o tipo de propiedad) y deja "property_code" en null.
+- Cuando tenga sentido, propone el siguiente paso (agendar visita, enviar requisitos).
+- No firmes el mensaje ni pongas saludos de despedida largos.
+
+Responde ÚNICAMENTE con un objeto JSON:
+{"property_code": string | null, "confidence": "alta" | "media" | "baja", "reasoning": "una frase explicando por qué es esa propiedad", "reply": "texto del borrador", "missing_info": ["datos que faltan en la ficha"]}`;
+
+  const fixed = detection.property
+    ? `\nLa propiedad de esta conversación YA ESTÁ IDENTIFICADA (${detection.source}): ${detection.property.code}. Usa esa ficha.\n`
+    : "";
+
+  const user = `Fichas de propiedades disponibles:
+${active.map(propertyCard).join("\n\n") || "(no hay fichas cargadas)"}
+${fixed}
+Canal: ${CHANNEL_LABEL[convo.channel]}
+Nombre del contacto: ${convo.contact_name}
+${convo.referral_text ? `Llegó desde: ${convo.referral_text}\n` : ""}${convo.notes ? `Notas internas: ${convo.notes}\n` : ""}
+Conversación (más antigua primero):
+${history}
+
+Redacta el borrador de respuesta al último mensaje del cliente.`;
+
+  const raw = await callClaude({
+    max_tokens: 1024,
+    system,
+    messages: [{ role: "user", content: user }],
+  });
+  const out = parseJson<{
+    property_code: string | null;
+    confidence: Confidence;
+    reasoning: string;
+    reply: string;
+    missing_info?: string[];
+  }>(raw);
+
+  let finalDetection = detection;
+  if (!detection.property && out.property_code) {
+    const p = active.find((x) => x.code.toUpperCase() === out.property_code!.toUpperCase());
+    if (p) finalDetection = { property: p, source: "ia", confidence: out.confidence };
+  }
+
+  return {
+    detection: finalDetection,
+    draft: {
+      text: out.reply,
+      property_code: finalDetection.property?.code ?? null,
+      confidence: finalDetection.property ? (finalDetection.confidence ?? out.confidence) : "baja",
+      reasoning: out.reasoning,
+      missing_info: out.missing_info ?? [],
+      generated_at: new Date().toISOString(),
+      engine: "ia",
+    },
+  };
+}
+
+/** Borrador simple cuando no hay clave de API: sirve para probar el flujo. */
+function templateDraft(
+  convo: ConversationWithMessages,
+  detection: Detection,
+  properties: Property[],
+): Draft {
+  const generic = /^(\+|Usuario )/.test(convo.contact_name);
+  const first = generic ? "" : convo.contact_name.replace(/^@/, "").split(/[ ._]/)[0];
+  const name = first ? first.charAt(0).toUpperCase() + first.slice(1) : "";
+  const p = detection.property;
+  if (!p) {
+    const options = properties
+      .filter((x) => x.active)
+      .slice(0, 3)
+      .map((x) => x.code)
+      .join(", ");
+    return {
+      text: `¡Hola${name ? " " + name : ""}! Gracias por escribirnos. Para darte la información correcta, ¿me cuentas por cuál propiedad consultas? Si tienes el código del aviso${options ? ` (por ejemplo ${options})` : ""} o el sector, mejor 😊`,
+      property_code: null,
+      confidence: "baja",
+      reasoning: "No se encontró aviso vinculado ni código en el mensaje.",
+      missing_info: [],
+      generated_at: new Date().toISOString(),
+      engine: "plantilla",
+    };
+  }
+  return {
+    text: `¡Hola${name ? " " + name : ""}! Gracias por tu interés en ${p.title} (${p.code}). Está en ${p.operation} por ${p.price}. ¿Te gustaría coordinar una visita?`,
+    property_code: p.code,
+    confidence: detection.confidence ?? "media",
+    reasoning:
+      detection.source === "aviso"
+        ? "La conversación llegó desde un aviso vinculado a esta propiedad."
+        : detection.source === "codigo"
+          ? `El cliente mencionó el código ${p.code}.`
+          : "Propiedad asignada manualmente.",
+    missing_info: [],
+    generated_at: new Date().toISOString(),
+    engine: "plantilla",
+  };
+}
+
+/* ------------------------------------------------------------------------ */
+/* Lectura de una ficha en PDF                                               */
+/* ------------------------------------------------------------------------ */
+
+export async function extractPropertyFromPdf(
+  base64Pdf: string,
+): Promise<Partial<PropertyInput>> {
+  if (!aiEnabled()) {
+    throw new Error("Para leer PDFs se necesita configurar ANTHROPIC_API_KEY.");
+  }
+  const raw = await callClaude({
+    max_tokens: 2048,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "document",
+            source: { type: "base64", media_type: "application/pdf", data: base64Pdf },
+          },
+          {
+            type: "text",
+            text: `Este documento describe una propiedad en venta o arriendo en Chile. Extrae sus datos y responde ÚNICAMENTE con un JSON:
+{"title": "título corto, p. ej. 'Depto 2D2B vista al mar, Reñaca'", "operation": "venta" | "arriendo", "price": "precio tal como aparece, con moneda (UF o $)", "sector": "comuna o sector", "address": "dirección o referencia", "bedrooms": número | null, "bathrooms": número | null, "area_m2": número | null, "brief": "resumen completo en líneas cortas con TODO dato útil para responder consultas: gastos comunes, estacionamiento, bodega, mascotas, requisitos, disponibilidad, amenidades, horarios de visita, etc. No inventes nada."}`,
+          },
+        ],
+      },
+    ],
+  });
+  return parseJson<Partial<PropertyInput>>(raw);
+}
