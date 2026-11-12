@@ -4,7 +4,7 @@ import type { Store } from "./types";
 
 let client: SupabaseClient | null = null;
 
-function sb(): SupabaseClient {
+export function sb(): SupabaseClient {
   if (!client) {
     client = createClient(
       process.env.SUPABASE_URL!,

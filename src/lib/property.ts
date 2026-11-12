@@ -1,11 +1,24 @@
 import { normalizeDetails, normalizeModalities } from "./ficha";
-import type { PropertyInput } from "./types";
+import type { Photo, PropertyInput } from "./types";
 
 const num = (v: unknown) => {
   if (v === null || v === undefined || v === "") return null;
   const n = Number(String(v).replace(",", "."));
   return Number.isFinite(n) ? n : null;
 };
+
+function normalizePhotos(raw: unknown): Photo[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((x) => x && typeof x === "object" && typeof x.path === "string" && typeof x.url === "string")
+    .map((x) => ({
+      path: x.path,
+      url: x.url,
+      ...(Number(x.width) ? { width: Number(x.width) } : {}),
+      ...(Number(x.height) ? { height: Number(x.height) } : {}),
+    }))
+    .slice(0, 40);
+}
 
 export function normalizeProperty(body: Record<string, unknown>): PropertyInput {
   const code = String(body.code ?? "").trim().toUpperCase();
@@ -29,6 +42,7 @@ export function normalizeProperty(body: Record<string, unknown>): PropertyInput 
     details: normalizeDetails(body.details),
     brief: String(body.brief ?? "").trim(),
     private_notes: String(body.private_notes ?? "").trim(),
+    photos: normalizePhotos(body.photos),
     ad_ids: adIds.map((x) => String(x).trim()).filter(Boolean),
     links: String(body.links ?? "").trim(),
     active: body.active !== false,

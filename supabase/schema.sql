@@ -17,6 +17,7 @@ create table if not exists properties (
   details jsonb not null default '{}',
   brief text not null default '',
   private_notes text not null default '',
+  photos jsonb not null default '[]',
   ad_ids text[] not null default '{}',
   links text not null default '',
   active boolean not null default true,
@@ -61,3 +62,8 @@ create index if not exists conversations_updated_idx on conversations (updated_a
 alter table properties enable row level security;
 alter table conversations enable row level security;
 alter table messages enable row level security;
+
+-- Espacio público para las fotos de las propiedades.
+insert into storage.buckets (id, name, public)
+values ('fotos', 'fotos', true)
+on conflict (id) do nothing;

@@ -8,7 +8,7 @@ export function buildSeed(): {
 } {
   const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
 
-  const base = { links: "", active: true, private_notes: "" };
+  const base = { links: "", active: true, private_notes: "", photos: [] };
   const properties: Property[] = [
     {
       ...base,

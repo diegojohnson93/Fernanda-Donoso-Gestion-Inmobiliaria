@@ -1,12 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type {
-  Channel,
-  ConversationStatus,
-  ConversationWithMessages,
-  Property,
-} from "@/lib/types";
+import type { Channel, ConversationStatus, ConversationWithMessages, Property } from "@/lib/types";
 import { MODALITIES, detailsToText, priceLines } from "@/lib/ficha";
 import {
   Button,
@@ -101,7 +97,11 @@ export function Inbox() {
         <div className="space-y-2 border-b border-line p-3">
           <div className="flex items-center justify-between">
             <h1 className="text-base font-semibold">Mensajes</h1>
-            <Button variant="ghost" className="!px-2 !py-1 text-xs" onClick={() => setSimOpen(true)}>
+            <Button
+              variant="ghost"
+              className="!px-2 !py-1 text-xs"
+              onClick={() => setSimOpen(true)}
+            >
               + Simular mensaje
             </Button>
           </div>
@@ -183,7 +183,9 @@ export function Inbox() {
                     )}
                     {c.draft && <Pill className="bg-accent-soft text-accent">Borrador listo</Pill>}
                     {c.status !== "nuevo" && (
-                      <Pill className={STATUSES[c.status].className}>{STATUSES[c.status].label}</Pill>
+                      <Pill className={STATUSES[c.status].className}>
+                        {STATUSES[c.status].label}
+                      </Pill>
                     )}
                   </div>
                 </button>
@@ -408,7 +410,9 @@ function ConversationView({
           {draft && (
             <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs">
               <span className="font-semibold text-accent">
-                {draft.engine === "ia" ? "Borrador de la IA" : "Borrador (plantilla, IA sin configurar)"}
+                {draft.engine === "ia"
+                  ? "Borrador de la IA"
+                  : "Borrador (plantilla, IA sin configurar)"}
               </span>
               {draft.property_code ? (
                 <Pill className={CONFIDENCE[draft.confidence].className}>
@@ -430,9 +434,7 @@ function ConversationView({
           )}
           <textarea
             className={`${inputClass} min-h-[96px] resize-y`}
-            placeholder={
-              draft ? "" : "Escribe una respuesta o pide una sugerencia a la IA…"
-            }
+            placeholder={draft ? "" : "Escribe una respuesta o pide una sugerencia a la IA…"}
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
@@ -452,7 +454,11 @@ function ConversationView({
               {busy === "draft" ? "Pensando…" : draft ? "Regenerar" : "Sugerir respuesta con IA"}
             </Button>
             {draft && (
-              <Button variant="ghost" disabled={busy !== null} onClick={() => patch({ draft: null })}>
+              <Button
+                variant="ghost"
+                disabled={busy !== null}
+                onClick={() => patch({ draft: null })}
+              >
                 Descartar borrador
               </Button>
             )}
@@ -502,47 +508,57 @@ function ConversationView({
           <p className="mt-1 text-[11px] text-muted">
             {convo.property_source === "manual" && "Elegida por ti. La IA usará esta ficha."}
             {convo.property_source === "aviso" && "Detectada por el aviso desde donde escribió."}
-            {convo.property_source === "codigo" && "Detectada por el código que escribió el cliente."}
+            {convo.property_source === "codigo" &&
+              "Detectada por el código que escribió el cliente."}
             {convo.property_source === "ia" && "Deducida por la IA a partir de la conversación."}
             {!convo.property_source && "Si la eliges aquí, la IA responderá con esa ficha."}
           </p>
         </div>
 
         {prop && (
-          <div className="rounded-xl border border-line p-3 text-sm">
-            <div className="flex flex-wrap items-center gap-1">
-              <span className="text-xs font-semibold text-brand">{prop.code}</span>
-              <ModalityPills modalities={prop.modalities ?? []} />
-              {!prop.active && <Pill className="bg-[#f8e5e3] text-bad">No disponible</Pill>}
-            </div>
-            <div className="mt-1 font-semibold leading-snug">{prop.title}</div>
-            <div className="mt-1 space-y-0.5 text-muted">
-              {priceLines(prop.modalities ?? [], prop.details ?? {}).map((l) => (
-                <div key={l.modality}>
-                  <span className="text-ink/70">{MODALITIES[l.modality].short}:</span> {l.text}
-                </div>
-              ))}
-            </div>
-            <div className="text-muted">
-              {[
-                prop.bedrooms && `${prop.bedrooms}D`,
-                prop.bathrooms && `${prop.bathrooms}B`,
-                prop.area_m2 && `${prop.area_m2} m²`,
-                prop.sector,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </div>
-            <p className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-ink/80">
-              {[detailsToText(prop.modalities ?? [], prop.details ?? {}), prop.brief]
-                .filter(Boolean)
-                .join("\n")}
-            </p>
-            {prop.private_notes && (
-              <div className="mt-2 rounded-lg bg-[#f4f4f2] p-2 text-xs">
-                <b>Nota privada:</b> {prop.private_notes}
-              </div>
+          <div className="overflow-hidden rounded-xl border border-line text-sm">
+            {prop.photos?.[0] && (
+              <img
+                src={prop.photos[0].url}
+                alt={prop.title}
+                className="aspect-[16/9] w-full object-cover"
+              />
             )}
+            <div className="p-3">
+              <div className="flex flex-wrap items-center gap-1">
+                <span className="text-xs font-semibold text-brand">{prop.code}</span>
+                <ModalityPills modalities={prop.modalities ?? []} />
+                {!prop.active && <Pill className="bg-[#f8e5e3] text-bad">No disponible</Pill>}
+              </div>
+              <div className="mt-1 font-semibold leading-snug">{prop.title}</div>
+              <div className="mt-1 space-y-0.5 text-muted">
+                {priceLines(prop.modalities ?? [], prop.details ?? {}).map((l) => (
+                  <div key={l.modality}>
+                    <span className="text-ink/70">{MODALITIES[l.modality].short}:</span> {l.text}
+                  </div>
+                ))}
+              </div>
+              <div className="text-muted">
+                {[
+                  prop.bedrooms && `${prop.bedrooms}D`,
+                  prop.bathrooms && `${prop.bathrooms}B`,
+                  prop.area_m2 && `${prop.area_m2} m²`,
+                  prop.sector,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </div>
+              <p className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-ink/80">
+                {[detailsToText(prop.modalities ?? [], prop.details ?? {}), prop.brief]
+                  .filter(Boolean)
+                  .join("\n")}
+              </p>
+              {prop.private_notes && (
+                <div className="mt-2 rounded-lg bg-[#f4f4f2] p-2 text-xs">
+                  <b>Nota privada:</b> {prop.private_notes}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

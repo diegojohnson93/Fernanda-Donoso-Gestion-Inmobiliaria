@@ -14,6 +14,14 @@ export type Confidence = "alta" | "media" | "baja";
 /** Cómo se determinó la propiedad de una conversación. */
 export type PropertySource = "aviso" | "codigo" | "ia" | "manual";
 
+export interface Photo {
+  /** Ruta dentro del almacenamiento (se usa para borrarla). */
+  path: string;
+  url: string;
+  width?: number;
+  height?: number;
+}
+
 export interface Property {
   id: string;
   /** Código corto que aparece en avisos y publicaciones, p. ej. "REN-01". */
@@ -32,6 +40,8 @@ export interface Property {
   brief: string;
   /** Notas privadas de Fernanda. La IA NO las recibe. */
   private_notes: string;
+  /** Fotos en orden; la primera es la portada. */
+  photos: Photo[];
   /** IDs de avisos de Meta o publicaciones vinculadas a esta propiedad. */
   ad_ids: string[];
   links: string;

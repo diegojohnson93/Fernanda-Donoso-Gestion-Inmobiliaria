@@ -13,7 +13,10 @@ La IA nunca envía nada sola.
   `REN-01`), una o más **modalidades** (Arriendo Airbnb, Arriendo año corrido, Arriendo marzo
   a diciembre, Venta) y una sección de campos para cada modalidad elegida. Al subir un
   **PDF**, la IA lo lee y completa los campos vacíos. Incluye **notas privadas** que la IA
-  nunca ve (precio mínimo del dueño, comisión, etc.). Los campos se definen en
+  nunca ve (precio mínimo del dueño, comisión, etc.).
+- **Fotos en la ficha**: subida múltiple (arrastrando o desde el celular), compresión
+  automática a 2000 px, orden arrastrando y elección de portada. Se guardan en el bucket
+  público `fotos` de Supabase Storage; al quitar una foto de la ficha se borra del almacenamiento. Los campos se definen en
   [`src/lib/ficha.ts`](src/lib/ficha.ts): agregar uno nuevo es sumar una línea ahí.
 - **Detección de la propiedad**, en este orden:
   1. Lo que Fernanda eligió a mano (siempre manda).

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -10,7 +11,8 @@ import {
   type FieldDef,
   type Modality,
 } from "@/lib/ficha";
-import type { Property } from "@/lib/types";
+import type { Photo, Property } from "@/lib/types";
+import { PhotoManager } from "./PhotoManager";
 import { Button, ModalityPills, Pill, inputClass } from "./ui";
 
 type FormState = {
@@ -25,6 +27,7 @@ type FormState = {
   details: Details;
   brief: string;
   private_notes: string;
+  photos: Photo[];
   ad_ids: string;
   links: string;
   active: boolean;
@@ -42,6 +45,7 @@ const empty: FormState = {
   details: {},
   brief: "",
   private_notes: "",
+  photos: [],
   ad_ids: "",
   links: "",
   active: true,
@@ -59,6 +63,7 @@ const toForm = (p: Property): FormState => ({
   details: p.details ?? {},
   brief: p.brief,
   private_notes: p.private_notes ?? "",
+  photos: p.photos ?? [],
   ad_ids: p.ad_ids.join(", "),
   links: p.links,
   active: p.active,
@@ -140,42 +145,60 @@ export function Properties() {
             <button
               key={p.id}
               onClick={() => setEditing({ id: p.id, form: toForm(p) })}
-              className={`flex flex-col rounded-2xl border border-line bg-white p-4 text-left shadow-sm transition hover:border-brand ${
+              className={`flex flex-col overflow-hidden rounded-2xl border border-line bg-white text-left shadow-sm transition hover:border-brand ${
                 p.active ? "" : "opacity-60"
               }`}
             >
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="rounded-md bg-brand px-2 py-0.5 text-xs font-bold text-white">
-                  {p.code}
-                </span>
-                <ModalityPills modalities={p.modalities ?? []} />
-                {!p.active && <Pill className="bg-[#f8e5e3] text-bad">No disponible</Pill>}
+              <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-[#eceef0]">
+                {p.photos?.[0] ? (
+                  <img
+                    src={p.photos[0].url}
+                    alt={p.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="grid h-full place-items-center text-xs text-muted">Sin fotos</div>
+                )}
+                {(p.photos?.length ?? 0) > 1 && (
+                  <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white">
+                    {p.photos.length} fotos
+                  </span>
+                )}
               </div>
-              <div className="mt-2 font-semibold leading-snug">{p.title}</div>
-              <div className="mt-1 space-y-0.5 text-sm text-muted">
-                {priceLines(p.modalities ?? [], p.details ?? {}).map((l) => (
-                  <div key={l.modality}>
-                    <span className="text-ink/70">{MODALITIES[l.modality].short}:</span> {l.text}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-1 text-xs text-muted">
-                {[
-                  p.bedrooms && `${p.bedrooms}D`,
-                  p.bathrooms && `${p.bathrooms}B`,
-                  p.area_m2 && `${p.area_m2} m²`,
-                  p.sector,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </div>
-              <div className="mt-3 flex gap-3 text-[11px] text-muted">
-                <span>{filled} campos completos</span>
-                <span>
-                  {p.ad_ids.length
-                    ? `${p.ad_ids.length} aviso${p.ad_ids.length > 1 ? "s" : ""} vinculado${p.ad_ids.length > 1 ? "s" : ""}`
-                    : "Sin avisos vinculados"}
-                </span>
+              <div className="flex flex-1 flex-col p-4">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="rounded-md bg-brand px-2 py-0.5 text-xs font-bold text-white">
+                    {p.code}
+                  </span>
+                  <ModalityPills modalities={p.modalities ?? []} />
+                  {!p.active && <Pill className="bg-[#f8e5e3] text-bad">No disponible</Pill>}
+                </div>
+                <div className="mt-2 font-semibold leading-snug">{p.title}</div>
+                <div className="mt-1 space-y-0.5 text-sm text-muted">
+                  {priceLines(p.modalities ?? [], p.details ?? {}).map((l) => (
+                    <div key={l.modality}>
+                      <span className="text-ink/70">{MODALITIES[l.modality].short}:</span> {l.text}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-1 text-xs text-muted">
+                  {[
+                    p.bedrooms && `${p.bedrooms}D`,
+                    p.bathrooms && `${p.bathrooms}B`,
+                    p.area_m2 && `${p.area_m2} m²`,
+                    p.sector,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </div>
+                <div className="mt-3 flex gap-3 text-[11px] text-muted">
+                  <span>{filled} campos completos</span>
+                  <span>
+                    {p.ad_ids.length
+                      ? `${p.ad_ids.length} aviso${p.ad_ids.length > 1 ? "s" : ""} vinculado${p.ad_ids.length > 1 ? "s" : ""}`
+                      : "Sin avisos vinculados"}
+                  </span>
+                </div>
               </div>
             </button>
           );
@@ -197,7 +220,12 @@ export function Properties() {
   );
 }
 
-const SPAN = { 2: "sm:col-span-2", 3: "sm:col-span-3", 4: "sm:col-span-4", 6: "sm:col-span-6" } as const;
+const SPAN = {
+  2: "sm:col-span-2",
+  3: "sm:col-span-3",
+  4: "sm:col-span-4",
+  6: "sm:col-span-6",
+} as const;
 
 function FieldInput({
   field,
@@ -223,9 +251,13 @@ function FieldInput({
               <button
                 type="button"
                 key={opt}
-                onClick={() => onChange(on ? selected.filter((x) => x !== opt) : [...selected, opt])}
+                onClick={() =>
+                  onChange(on ? selected.filter((x) => x !== opt) : [...selected, opt])
+                }
                 className={`rounded-full border px-2.5 py-1 text-xs ${
-                  on ? "border-brand bg-brand-soft text-brand" : "border-line text-muted hover:text-ink"
+                  on
+                    ? "border-brand bg-brand-soft text-brand"
+                    : "border-line text-muted hover:text-ink"
                 }`}
               >
                 {on ? "✓ " : ""}
@@ -282,7 +314,7 @@ function PropertyEditor({
   onSaved: () => void;
 }) {
   const [form, setForm] = useState<FormState>(initial);
-  const [busy, setBusy] = useState<null | "save" | "pdf" | "delete">(null);
+  const [busy, setBusy] = useState<null | "save" | "pdf" | "delete" | "photos">(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -356,7 +388,9 @@ function PropertyEditor({
           details: { ...(data.details ?? {}), ...f.details },
           brief: [f.brief, data.brief].filter(Boolean).join("\n"),
         }));
-        setNotice("La IA leyó el PDF y completó lo que encontró. Revisa la ficha antes de guardar.");
+        setNotice(
+          "La IA leyó el PDF y completó lo que encontró. Revisa la ficha antes de guardar.",
+        );
       } catch (e) {
         setError((e as Error).message);
       } finally {
@@ -416,7 +450,11 @@ function PropertyEditor({
               Arrástralo aquí y la IA completa la ficha por ti (solo los campos que estén vacíos).
               También acepta .txt o .md.
             </p>
-            <Button className="mt-2" disabled={busy !== null} onClick={() => fileRef.current?.click()}>
+            <Button
+              className="mt-2"
+              disabled={busy !== null}
+              onClick={() => fileRef.current?.click()}
+            >
               {busy === "pdf" ? "Leyendo PDF…" : "Elegir archivo"}
             </Button>
             <input
@@ -447,7 +485,16 @@ function PropertyEditor({
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold">2. Modalidades *</h3>
+            <h3 className="mb-2 text-sm font-semibold">2. Fotos</h3>
+            <PhotoManager
+              photos={form.photos}
+              onChange={(updater) => setForm((f) => ({ ...f, photos: updater(f.photos) }))}
+              onBusy={(b) => setBusy(b ? "photos" : null)}
+            />
+          </section>
+
+          <section>
+            <h3 className="text-sm font-semibold">3. Modalidades *</h3>
             <p className="mb-2 text-xs text-muted">
               Marca todas las que apliquen. Se abre una sección por cada una.
             </p>
@@ -493,7 +540,7 @@ function PropertyEditor({
               >
                 <div className="mb-2 flex items-center gap-2">
                   <h3 className="text-sm font-semibold">
-                    {i + 3}. {section.title}
+                    {i + 4}. {section.title}
                   </h3>
                   {section.modality && <ModalityPills modalities={[section.modality]} />}
                   <span className="ml-auto text-[11px] text-muted">
@@ -515,7 +562,7 @@ function PropertyEditor({
           })}
 
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold">{sections.length + 3}. Información adicional</h3>
+            <h3 className="text-sm font-semibold">{sections.length + 4}. Información adicional</h3>
             <label className="block">
               <span className="mb-1 block text-xs font-medium text-muted">
                 Todo lo que no calce arriba y preguntas frecuentes (la IA lo usa)
@@ -523,7 +570,9 @@ function PropertyEditor({
               <textarea
                 className={`${inputClass} min-h-[110px]`}
                 value={form.brief}
-                placeholder={"¿Se puede pintar? Sí, con autorización.\n¿Hay ruido? Calle tranquila, sin locales nocturnos."}
+                placeholder={
+                  "¿Se puede pintar? Sí, con autorización.\n¿Hay ruido? Calle tranquila, sin locales nocturnos."
+                }
                 onChange={(e) => set("brief", e.target.value)}
               />
             </label>
@@ -596,7 +645,7 @@ function PropertyEditor({
             )}
             <Button onClick={onClose}>Cancelar</Button>
             <Button variant="primary" disabled={busy !== null} onClick={save}>
-              {busy === "save" ? "Guardando…" : "Guardar"}
+              {busy === "save" ? "Guardando…" : busy === "photos" ? "Subiendo fotos…" : "Guardar"}
             </Button>
           </div>
         </div>
