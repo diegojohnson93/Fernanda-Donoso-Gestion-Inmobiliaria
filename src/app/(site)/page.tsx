@@ -6,6 +6,7 @@ import { Parallax } from "@/components/site/Parallax";
 import { PropertyCard } from "@/components/site/PropertyCard";
 import { Reveal } from "@/components/site/Reveal";
 import { ScaleImage } from "@/components/site/ScaleImage";
+import { ScrollBg } from "@/components/site/ScrollBg";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { getPublishedProperties } from "@/lib/public";
@@ -33,8 +34,9 @@ export default async function Home() {
 
   return (
     <>
-      {/* Portada */}
-      <section className="relative flex min-h-[100svh] flex-col">
+      {/* Portada en blanco; el fondo pasa a beige al bajar */}
+      <ScrollBg trigger="#portada" from="#ffffff" to="#f5f1ea" />
+      <section id="portada" className="relative flex min-h-[100svh] flex-col">
         <SiteHeader />
         <div className="flex flex-1 flex-col justify-center">
           <MarqueeHero text={SITE.hero.marquee} image={heroImage} />

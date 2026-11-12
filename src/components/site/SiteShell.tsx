@@ -77,6 +77,7 @@ export function SiteShell({ categories, children }: { categories: CategoryInfo[]
 
       {/* Página */}
       <div
+        id="page"
         ref={pageRef}
         className={`relative z-10 min-h-screen bg-cream [--shift:52vh] md:[--shift:68vh] transition-transform duration-[900ms] ease-[cubic-bezier(.7,0,.2,1)] ${
           selection ? "pointer-events-none overflow-hidden rounded-sm shadow-2xl" : ""
