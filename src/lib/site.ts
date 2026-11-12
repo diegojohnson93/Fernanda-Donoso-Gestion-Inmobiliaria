@@ -23,6 +23,10 @@ export const SITE = {
     badge: "Primera asesoría sin costo",
   },
 
+  /** Párrafo grande después de la foto que crece. */
+  statement:
+    "Te acompañamos desde la primera conversación hasta la entrega de llaves: entendemos tus números y tus objetivos, seleccionamos las propiedades que de verdad te convienen y negociamos por ti, para que tomes la mejor decisión con total confianza.",
+
   intro: {
     title: "Mucho más que una corredora",
     text: "Antes de mostrarte propiedades, conversamos. Entendemos tu situación y tus objetivos para recomendarte lo que de verdad te conviene.",

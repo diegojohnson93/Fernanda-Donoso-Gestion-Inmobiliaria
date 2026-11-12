@@ -7,6 +7,7 @@ import { PropertyCard } from "@/components/site/PropertyCard";
 import { Reveal } from "@/components/site/Reveal";
 import { ScaleImage } from "@/components/site/ScaleImage";
 import { ScrollBg } from "@/components/site/ScrollBg";
+import { ScrollText } from "@/components/site/ScrollText";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { getPublishedProperties } from "@/lib/public";
@@ -59,6 +60,14 @@ export default async function Home() {
 
       {/* Foto que crece */}
       <ScaleImage src={bigImage} />
+
+      {/* Declaración */}
+      <section className="px-5 pb-10 pt-28 md:px-12 md:pt-40">
+        <ScrollText
+          text={SITE.statement}
+          className="mx-auto max-w-[1180px] text-[28px] font-medium leading-[1.14] tracking-[-0.015em] md:text-[54px]"
+        />
+      </section>
 
       {/* Mucho más que una corredora */}
       <section className="px-5 py-28 md:px-12 md:py-40">
