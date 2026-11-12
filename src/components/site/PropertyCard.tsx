@@ -29,13 +29,10 @@ export function PropertyCard({
           />
         ) : (
           <div className="grid h-full w-full place-items-center text-cream/80">
-            <svg viewBox="0 0 48 60" className="h-16 w-14" fill="none" aria-hidden>
-              <path d="M5 58V25a19 19 0 0 1 38 0v33" stroke="currentColor" strokeWidth="1" />
-              <path d="M1 58h46" stroke="currentColor" strokeWidth="1" />
-            </svg>
+            <span aria-hidden className="font-serif text-5xl italic text-cream/80">FD</span>
           </div>
         )}
-        <span className="absolute left-3 top-3 bg-cream/90 px-2 py-1 text-[10px] font-semibold tracking-[0.2em] text-charcoal">
+        <span className="absolute left-3 top-3 bg-cream/90 px-2 py-1 text-[10px] font-semibold tracking-[0.04em] text-charcoal">
           {p.code}
         </span>
       </div>

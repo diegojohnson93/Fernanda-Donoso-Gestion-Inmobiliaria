@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { CategoryCards } from "@/components/site/CategoryCards";
 import { ContactForm } from "@/components/site/Forms";
-import { LogoMark } from "@/components/site/Logo";
 import { MarqueeHero } from "@/components/site/Marquee";
 import { Parallax } from "@/components/site/Parallax";
 import { PropertyCard } from "@/components/site/PropertyCard";
@@ -207,7 +206,7 @@ export default async function Home() {
         <div className="mx-auto grid max-w-[1240px] items-center gap-14 md:grid-cols-2 md:gap-24">
           <Reveal className="relative mx-auto aspect-[4/5] w-full max-w-md bg-beige">
             <div className="absolute inset-0 grid place-items-center text-cream">
-              <LogoMark className="h-40 w-32" strokeWidth={0.6} />
+              <span aria-hidden className="font-serif text-[120px] italic leading-none text-cream/80">FD</span>
             </div>
           </Reveal>
           <div>

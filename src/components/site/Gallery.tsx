@@ -30,10 +30,7 @@ export function Gallery({ photos, title }: { photos: Photo[]; title: string }) {
   if (!photos.length) {
     return (
       <div className="grid aspect-[16/9] place-items-center bg-beige text-cream">
-        <svg viewBox="0 0 48 60" className="h-24 w-20" fill="none" aria-hidden>
-          <path d="M5 58V25a19 19 0 0 1 38 0v33" stroke="currentColor" strokeWidth="0.8" />
-          <path d="M1 58h46" stroke="currentColor" strokeWidth="0.8" />
-        </svg>
+        <span aria-hidden className="font-serif text-7xl italic text-cream/80">FD</span>
       </div>
     );
   }

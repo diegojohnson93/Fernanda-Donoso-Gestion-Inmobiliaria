@@ -46,10 +46,7 @@ export function MarqueeHero({
           <img src={image} alt={imageAlt} className="h-full w-full object-cover" />
         ) : (
           <div className="grid h-full w-full place-items-center">
-            <svg viewBox="0 0 48 60" className="h-1/2 w-1/2 text-cream/70" fill="none" aria-hidden>
-              <path d="M5 58V25a19 19 0 0 1 38 0v33" stroke="currentColor" strokeWidth="1" />
-              <path d="M1 58h46" stroke="currentColor" strokeWidth="1" />
-            </svg>
+            <span aria-hidden className="font-serif text-6xl italic text-cream/80">FD</span>
           </div>
         )}
       </div>

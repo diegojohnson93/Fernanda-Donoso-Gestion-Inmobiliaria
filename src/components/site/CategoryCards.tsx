@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import type { Category } from "@/lib/site";
-import { LogoMark } from "./Logo";
 
 export interface CategoryInfo {
   category: Category;
@@ -60,7 +59,7 @@ export function CategoryCards({
                 compact ? "min-h-[170px] md:min-h-[300px]" : "min-h-[240px] md:min-h-[380px]"
               }`}
             >
-              <LogoMark className="h-7 w-6 opacity-90" strokeWidth={1.4} />
+              <span className="font-serif text-lg italic leading-none opacity-80">FD</span>
               <div className="flex items-end justify-between gap-2">
                 <p
                   className={`whitespace-pre-line text-[11px] leading-snug opacity-90 md:text-xs ${compact ? "hidden md:block" : ""}`}
