@@ -111,11 +111,11 @@ export function ModalityCards({ items, total }: { items: CategoryInfo[]; total: 
                   <span className="text-[11px] opacity-80">0{i + 1}</span>
                 </div>
                 <div className="flex items-end justify-between gap-2">
-                  <div className="relative h-9 overflow-hidden text-[11px] leading-snug md:text-xs">
-                    <p className="whitespace-pre-line opacity-90 transition-transform duration-500 ease-[cubic-bezier(.16,1,.3,1)] group-hover:-translate-y-full">
+                  <div className="relative min-w-0 text-[11px] leading-snug md:h-9 md:overflow-hidden md:text-xs">
+                    <p className="opacity-90 transition-transform duration-500 ease-[cubic-bezier(.16,1,.3,1)] md:whitespace-pre-line md:group-hover:-translate-y-full">
                       {c.description}
                     </p>
-                    <p className="absolute inset-x-0 top-full font-medium transition-transform duration-500 ease-[cubic-bezier(.16,1,.3,1)] group-hover:-translate-y-full">
+                    <p className="mt-2 font-medium transition-transform duration-500 ease-[cubic-bezier(.16,1,.3,1)] md:absolute md:inset-x-0 md:top-full md:mt-0 md:group-hover:-translate-y-full">
                       Ver {count} {count === 1 ? "propiedad" : "propiedades"} →
                     </p>
                   </div>
