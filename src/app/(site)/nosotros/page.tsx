@@ -5,10 +5,8 @@ import { Label } from "@/components/site/Label";
 import { MarqueeText } from "@/components/site/Marquee";
 import { CountUp, SplitReveal } from "@/components/site/Motion";
 import { Reveal } from "@/components/site/Reveal";
-import { ScaleImage } from "@/components/site/ScaleImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { getPublishedProperties } from "@/lib/public";
 import { SITE, whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -17,23 +15,14 @@ export const metadata: Metadata = {
     "Fernanda Donoso, Ingeniera Civil Industrial PUCV, asesora inmobiliaria en Viña del Mar, Valparaíso, Reñaca y Concón. Primera asesoría gratuita.",
 };
 
-export default async function AboutPage() {
-  const photos = (await getPublishedProperties()).flatMap((p) => p.photos.map((ph) => ph.url));
-  const vina = "/images/vina-del-mar.webp";
-  const heroPhoto = photos[0] ?? vina;
+export default function AboutPage() {
+  const heroPhoto = "/images/renaca.webp";
 
   return (
     <>
       {/* Portada con foto a todo el ancho y texto gigante en blanco */}
       <section className="relative flex h-[100svh] min-h-[560px] flex-col overflow-hidden bg-taupe text-white">
-        {heroPhoto ? (
-          <img src={heroPhoto} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        ) : (
-          <div
-            className="absolute inset-0"
-            style={{ backgroundImage: "linear-gradient(160deg, #d8ccbc 0%, #a8977f 55%, #7b7168 100%)" }}
-          />
-        )}
+        <img src={heroPhoto} alt="Reñaca, Viña del Mar" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/5 to-black/25" />
         <div className="relative">
           <SiteHeader tone="light" />
@@ -61,8 +50,6 @@ export default async function AboutPage() {
           </SplitReveal>
         </div>
       </section>
-
-      <ScaleImage src="/images/renaca.webp" alt="Reñaca, Viña del Mar" />
 
       {/* Fernanda */}
       <section className="bg-white px-5 py-28 md:px-12 md:py-40">
