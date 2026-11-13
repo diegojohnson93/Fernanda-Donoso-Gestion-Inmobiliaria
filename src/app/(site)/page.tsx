@@ -17,12 +17,10 @@ const button = "eyebrow inline-flex h-12 items-center justify-center border px-7
 
 export default async function Home() {
   const properties = await getPublishedProperties();
-  const withPhotos = properties.filter((p) => p.photos.length);
   const categories = CATEGORIES.map((category) => {
     const list = properties.filter((p) => p.modalities.includes(category.modality));
     return { category, count: list.length, cover: list.find((p) => p.photos[0])?.photos[0].url ?? null };
   });
-  const heroImage = withPhotos.find((p) => p.featured)?.photos[0].url ?? withPhotos[0]?.photos[0].url ?? null;
 
   return (
     <>
@@ -30,7 +28,7 @@ export default async function Home() {
       <section className="relative flex min-h-[100svh] flex-col bg-white">
         <SiteHeader />
         <div className="flex flex-1 flex-col justify-center">
-          <MarqueeHero text={SITE.hero.marquee} image={heroImage} />
+          <MarqueeHero text={SITE.hero.marquee} image="/images/fernanda.webp" imageAlt="Fernanda Donoso" imagePosition="50% 22%" />
           <div className="px-5 pb-24 text-center md:pb-14">
             <p className="mx-auto max-w-xl text-[15px] font-medium leading-relaxed md:text-[17px]">
               <Typewriter text={SITE.hero.lead} on="load" startDelay={1700} speed={26} />

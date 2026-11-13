@@ -10,12 +10,14 @@ export function MarqueeHero({
   imageAlt = "",
   tone = "dark",
   fallbackBg = "bg-beige",
+  imagePosition = "50% 50%",
 }: {
   text: string;
   image?: string | null;
   imageAlt?: string;
   tone?: "dark" | "light";
   fallbackBg?: string;
+  imagePosition?: string;
 }) {
   const item = (
     <span className="flex shrink-0 items-center whitespace-nowrap">
@@ -43,7 +45,7 @@ export function MarqueeHero({
         className={`absolute left-1/2 top-1/2 aspect-square w-[42vw] max-w-[260px] -translate-x-1/2 -translate-y-1/2 overflow-hidden md:w-[17vw] ${fallbackBg}`}
       >
         {image ? (
-          <img src={image} alt={imageAlt} className="h-full w-full object-cover" />
+          <img src={image} alt={imageAlt} className="h-full w-full object-cover" style={{ objectPosition: imagePosition }} />
         ) : (
           <div className="grid h-full w-full place-items-center">
             <span aria-hidden className="font-serif text-6xl italic text-cream/80">FD</span>

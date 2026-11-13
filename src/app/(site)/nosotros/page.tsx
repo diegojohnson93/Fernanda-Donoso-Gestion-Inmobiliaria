@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default async function AboutPage() {
   const photos = (await getPublishedProperties()).flatMap((p) => p.photos.map((ph) => ph.url));
   const vina = "/images/vina-del-mar.webp";
-  const [heroPhoto, midPhoto, quotePhoto] = [photos[0] ?? vina, vina, photos[2] ?? photos[0] ?? vina];
+  const [heroPhoto, midPhoto, quotePhoto] = [photos[0] ?? vina, vina, "/images/fernanda.webp"];
 
   return (
     <>
@@ -94,7 +94,7 @@ export default async function AboutPage() {
       <section className="bg-white px-5 pb-28 text-center md:px-12 md:pb-40">
         <Reveal className="mx-auto mb-12 aspect-square w-32 overflow-hidden bg-beige md:w-40">
           {quotePhoto ? (
-            <img src={quotePhoto} alt="" className="h-full w-full object-cover" />
+            <img src={quotePhoto} alt="Fernanda Donoso" className="h-full w-full object-cover object-[50%_22%]" />
           ) : (
             <div className="grid h-full place-items-center font-serif text-4xl italic text-white/80">FD</div>
           )}
