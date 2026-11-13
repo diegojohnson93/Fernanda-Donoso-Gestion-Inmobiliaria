@@ -13,17 +13,23 @@ export function generateStaticParams() {
   return CATEGORIES.map((c) => ({ slug: c.slug }));
 }
 
-export async function generateMetadata({ params }: PageProps<"/propiedades/[slug]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/propiedades/[slug]">): Promise<Metadata> {
   const c = categoryBySlug((await params).slug);
   if (!c) return {};
   const title = c.title;
   return { title, description: c.lead };
 }
 
-export default async function CategoryPage({ params }: PageProps<"/propiedades/[slug]">) {
+export default async function CategoryPage({
+  params,
+}: PageProps<"/propiedades/[slug]">) {
   const c = categoryBySlug((await params).slug);
   if (!c) notFound();
-  const list = (await getPublishedProperties()).filter((p) => p.modalities.includes(c.modality));
+  const list = (await getPublishedProperties()).filter((p) =>
+    p.modalities.includes(c.modality),
+  );
 
   return (
     <>
@@ -34,9 +40,14 @@ export default async function CategoryPage({ params }: PageProps<"/propiedades/[
         imagePosition={c.imagePosition}
         header={<SiteHeader tone="light" />}
       >
-        <p className="mx-auto max-w-lg text-[15px] font-medium leading-relaxed md:text-[17px]">{c.lead}</p>
+        <p className="mx-auto max-w-lg text-[15px] font-medium leading-relaxed md:text-[17px]">
+          {c.lead}
+        </p>
         <p className="eyebrow mx-auto mt-5 inline-block border border-white/80 px-3 py-1.5 !text-[9.5px]">
-          {list.length} {list.length === 1 ? "propiedad disponible" : "propiedades disponibles"}
+          {list.length}{" "}
+          {list.length === 1
+            ? "propiedad disponible"
+            : "propiedades disponibles"}
         </p>
       </PhotoHero>
 
@@ -57,13 +68,17 @@ export default async function CategoryPage({ params }: PageProps<"/propiedades/[
             </div>
           ) : (
             <Reveal className="mx-auto max-w-xl py-10 text-center">
-              <h2 className="font-serif text-4xl font-light md:text-5xl">Muy pronto, nuevas propiedades</h2>
+              <h2 className="font-serif text-4xl font-light md:text-5xl">
+                Muy pronto, nuevas propiedades
+              </h2>
               <p className="mt-5 text-[15px] leading-relaxed text-graphite">
-                Cuéntanos qué buscas y te avisamos apenas tengamos algo para ti. También podemos asesorarte gratis
-                para definir la mejor opción.
+                Cuéntanos qué buscas y te avisamos apenas tengamos algo para ti.
+                También podemos asesorarte gratis para definir la mejor opción.
               </p>
               <a
-                href={whatsappLink(`Hola Fernanda, busco una propiedad en ${c.title}`)}
+                href={whatsappLink(
+                  `Hola Fernanda, busco una propiedad en ${c.title}`,
+                )}
                 target="_blank"
                 rel="noreferrer"
                 className="eyebrow mt-8 inline-flex h-12 items-center border border-charcoal px-7 transition hover:bg-charcoal hover:text-cream"
@@ -75,27 +90,39 @@ export default async function CategoryPage({ params }: PageProps<"/propiedades/[
         </div>
       </section>
 
-      <section className="bg-sand px-5 py-24 text-center md:px-12 md:py-32">
-        <Reveal as="p" className="eyebrow text-stone">
-          {SITE.advisory.eyebrow}
-        </Reveal>
-        <Reveal as="h2" delay={80} className="mx-auto mt-4 max-w-2xl font-serif text-4xl font-light leading-[1.05] md:text-6xl">
-          ¿No sabes cuál es la mejor opción para ti?
-        </Reveal>
-        <Reveal as="p" delay={160} className="mx-auto mt-6 max-w-md text-[15px] leading-relaxed text-graphite">
-          Conversemos sin costo: revisamos tus ingresos, tu ahorro y tus expectativas para recomendarte lo que de verdad te conviene.
-        </Reveal>
-        <Reveal delay={220}>
-          <a
-            href={whatsappLink(SITE.advisoryWhatsapp)}
-            target="_blank"
-            rel="noreferrer"
-            className="eyebrow mt-9 inline-flex h-12 items-center bg-charcoal px-7 text-cream transition hover:bg-graphite"
+      {/* Asesoría: no aplica a estadías cortas (Airbnb) */}
+      {c.slug !== "airbnb" && (
+        <section className="bg-sand px-5 py-24 text-center md:px-12 md:py-32">
+          <Reveal as="p" className="eyebrow text-stone">
+            {SITE.advisory.eyebrow}
+          </Reveal>
+          <Reveal
+            as="h2"
+            delay={80}
+            className="mx-auto mt-4 max-w-2xl font-serif text-4xl font-light leading-[1.05] md:text-6xl"
           >
-            Agenda tu asesoría gratuita
-          </a>
-        </Reveal>
-      </section>
+            ¿No sabes cuál es la mejor opción para ti?
+          </Reveal>
+          <Reveal
+            as="p"
+            delay={160}
+            className="mx-auto mt-6 max-w-md text-[15px] leading-relaxed text-graphite"
+          >
+            Conversemos sin costo: revisamos tus ingresos, tu ahorro y tus
+            expectativas para recomendarte lo que de verdad te conviene.
+          </Reveal>
+          <Reveal delay={220}>
+            <a
+              href={whatsappLink(SITE.advisoryWhatsapp)}
+              target="_blank"
+              rel="noreferrer"
+              className="eyebrow mt-9 inline-flex h-12 items-center bg-charcoal px-7 text-cream transition hover:bg-graphite"
+            >
+              Agenda tu asesoría gratuita
+            </a>
+          </Reveal>
+        </section>
+      )}
       <SiteFooter />
     </>
   );
