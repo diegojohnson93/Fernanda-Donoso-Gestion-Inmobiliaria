@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SITE, whatsappLink } from "@/lib/site";
 import { CategoryCards, type CategoryInfo } from "./CategoryCards";
+import { Cursor } from "./Cursor";
 
 /**
  * Envoltura de la web pública.
@@ -118,6 +119,7 @@ export function SiteShell({ categories, children }: { categories: CategoryInfo[]
 
   return (
     <div className={`site relative min-h-full ${selection ? "bg-sand" : "bg-white"}`}>
+      <Cursor />
       {/* Cortina de transición */}
       <div
         ref={curtainRef}

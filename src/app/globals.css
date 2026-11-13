@@ -112,3 +112,16 @@ html.js [data-split]:not([data-ready]) {
     transform: none;
   }
 }
+
+/* Cursor personalizado de la web pública (solo con mouse) */
+@media (pointer: fine) {
+  html.has-cursor .site,
+  html.has-cursor .site * {
+    cursor: none !important;
+  }
+  html.has-cursor .site input,
+  html.has-cursor .site textarea,
+  html.has-cursor .site select {
+    cursor: text !important;
+  }
+}
