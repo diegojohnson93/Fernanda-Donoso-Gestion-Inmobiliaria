@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CategoryCards } from "@/components/site/CategoryCards";
 import { ContactForm } from "@/components/site/Forms";
 import { MarqueeHero } from "@/components/site/Marquee";
 import { CountUp, SplitReveal, Typewriter } from "@/components/site/Motion";
@@ -10,13 +11,17 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Label } from "@/components/site/Label";
 import { getPublishedProperties } from "@/lib/public";
-import { SITE, whatsappLink } from "@/lib/site";
+import { CATEGORIES, SITE, whatsappLink } from "@/lib/site";
 
 const button = "eyebrow inline-flex h-12 items-center justify-center border px-7 transition duration-300";
 
 export default async function Home() {
   const properties = await getPublishedProperties();
   const withPhotos = properties.filter((p) => p.photos.length);
+  const categories = CATEGORIES.map((category) => {
+    const list = properties.filter((p) => p.modalities.includes(category.modality));
+    return { category, count: list.length, cover: list.find((p) => p.photos[0])?.photos[0].url ?? null };
+  });
   const heroImage = withPhotos.find((p) => p.featured)?.photos[0].url ?? withPhotos[0]?.photos[0].url ?? null;
 
   return (
@@ -71,6 +76,26 @@ export default async function Home() {
           text={SITE.statement}
           className="mx-auto max-w-[1180px] text-[28px] font-medium leading-[1.14] tracking-[-0.015em] md:text-[54px]"
         />
+      </section>
+
+      {/* Modalidades: las cuatro tarjetas */}
+      <section className="bg-white px-5 pb-10 pt-28 md:px-12 md:pt-36">
+        <div className="mx-auto max-w-[1340px]">
+          <div className="mb-10 grid gap-6 md:mb-14 md:grid-cols-[1fr_2fr] md:items-end">
+            <Label>Modalidades</Label>
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <SplitReveal as="h2" type="chars" className="font-serif text-[48px] font-light leading-[0.98] md:text-[84px]">
+                ¿Qué estás buscando?
+              </SplitReveal>
+              <SplitReveal as="p" delay={150} className="max-w-xs text-sm leading-relaxed text-stone">
+                Elige una modalidad y te mostramos las propiedades disponibles.
+              </SplitReveal>
+            </div>
+          </div>
+          <Reveal>
+            <CategoryCards items={categories} />
+          </Reveal>
+        </div>
       </section>
 
       {/* Lo que recibes */}
