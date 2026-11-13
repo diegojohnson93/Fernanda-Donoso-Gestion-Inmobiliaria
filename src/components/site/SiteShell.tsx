@@ -1,6 +1,7 @@
 "use client";
 
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -44,10 +45,14 @@ export function SiteShell({ categories, children }: { categories: CategoryInfo[]
       ).to({}, { duration: 0.25 });
     }
     tl.to(c, { yPercent: -100, duration: first ? 1.1 : 0.9, ease: "expo.inOut" }).from(
-      "#page main, #page section",
+      // Las secciones fijadas con el scroll (data-pin) no se mueven: el pin las controla.
+      "#page main, #page section:not([data-pin])",
       { y: 60, duration: 1.1, ease: "expo.out", stagger: 0.04, clearProps: "transform" },
       "<0.35",
-    );
+    ).add(() => {
+      gsap.registerPlugin(ScrollTrigger);
+      ScrollTrigger.refresh();
+    });
     return () => {
       tl.kill();
     };

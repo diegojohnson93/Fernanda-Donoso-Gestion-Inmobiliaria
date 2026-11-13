@@ -66,7 +66,13 @@ export function ExpandHero({
         .fromTo(ph.querySelector("img"), { scale: 1.08 }, { scale: 1, ease: "power1.inOut" }, 0);
       if (lead.current) tl.to(lead.current, { autoAlpha: 0, y: -30, duration: 0.35 }, 0);
     }, s);
-    return () => ctx.revert();
+    // Las tipografías cambian el alto del texto y mueven el cuadrado: recalcular.
+    let alive = true;
+    document.fonts?.ready.then(() => alive && ScrollTrigger.refresh());
+    return () => {
+      alive = false;
+      ctx.revert();
+    };
   }, []);
 
   const item = (
@@ -79,7 +85,7 @@ export function ExpandHero({
   );
 
   return (
-    <section ref={section} className={`relative flex h-[100svh] min-h-[560px] flex-col overflow-hidden ${bg} text-cream`}>
+    <section ref={section} data-pin className={`relative flex h-[100svh] min-h-[560px] flex-col overflow-hidden ${bg} text-cream`}>
       <div className="relative z-20">{header}</div>
       <div className="flex flex-1 flex-col justify-center">
         <div className="relative flex h-[46vh] min-h-[260px] items-center overflow-hidden md:h-[52vh]">
