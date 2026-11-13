@@ -132,7 +132,7 @@ export function ModalityCards({ items, total }: { items: CategoryInfo[]; total: 
                   <img
                     src={cover}
                     alt=""
-                    className="h-full w-full scale-110 object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-100"
+                    className="h-full w-full scale-110 object-cover opacity-[0.07] grayscale contrast-75 mix-blend-luminosity transition-[transform,opacity] duration-[1200ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-100 group-hover:opacity-[0.12]"
                   />
                 ) : (
                   <div
