@@ -168,7 +168,7 @@ export function SiteShell({ categories, children }: { categories: CategoryInfo[]
         id="page"
         ref={pageRef}
         className={`relative z-10 min-h-screen bg-white [--shift:52vh] md:[--shift:68vh] transition-[transform,opacity] duration-[900ms] ease-[cubic-bezier(.7,0,.2,1)] ${
-          selection ? "pointer-events-none overflow-hidden rounded-sm opacity-50 shadow-2xl" : ""
+          selection ? "pointer-events-none overflow-hidden rounded-sm opacity-33 shadow-2xl" : ""
         }`}
         style={
           selection
