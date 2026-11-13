@@ -1,5 +1,5 @@
 import { airbnbBusyNights, type Availability } from "./airbnb-calendar";
-import { FICHA, MODALITIES, PRIVATE_DETAIL_KEYS, priceLines, type Details, type Modality } from "./ficha";
+import { FICHA, MODALITIES, PRIVATE_DETAIL_KEYS, priceLines, surfaceText, type Details, type Modality } from "./ficha";
 import { getStore } from "./store";
 import type { Photo, Property } from "./types";
 
@@ -87,7 +87,8 @@ export function factsLine(p: PublicProperty): string {
   return [
     p.bedrooms ? `${p.bedrooms} ${p.bedrooms === 1 ? "dormitorio" : "dormitorios"}` : null,
     p.bathrooms ? `${p.bathrooms} ${p.bathrooms === 1 ? "baño" : "baños"}` : null,
-    p.area_m2 ? `${p.area_m2} m²` : null,
+    p.area_m2 ? `${p.area_m2} m² útiles` : null,
+    typeof p.details.m2_totales === "string" && p.details.m2_totales.trim() ? `${p.details.m2_totales.trim()} m² totales` : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -115,5 +116,10 @@ export function detailSections(p: PublicProperty): DetailSection[] {
         })
         .filter((r) => r.value),
     }))
+    .map((s) =>
+      s.id === "general" && surfaceText(p.area_m2, p.details)
+        ? { ...s, rows: [{ label: "Superficie", value: surfaceText(p.area_m2, p.details) }, ...s.rows] }
+        : s,
+    )
     .filter((s) => s.rows.length);
 }

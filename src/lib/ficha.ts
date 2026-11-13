@@ -30,6 +30,24 @@ export interface FieldDef {
   span?: 2 | 3 | 4 | 6;
 }
 
+/** Superficies que se llenan junto a los m² útiles (en "Identificación"). */
+export const SURFACE_FIELDS = [
+  { key: "m2_terraza", label: "m² terraza" },
+  { key: "m2_totales", label: "m² totales (útiles + terraza)" },
+] as const;
+
+/** Texto de superficies: "85 m² útiles · 12 m² terraza · 97 m² totales". */
+export function surfaceText(area: number | null | undefined, d: Details): string {
+  const n = (v: unknown) => (typeof v === "string" || typeof v === "number" ? String(v).trim() : "");
+  return [
+    area ? `${area} m² útiles` : "",
+    n(d.m2_terraza) ? `${n(d.m2_terraza)} m² terraza` : "",
+    n(d.m2_totales) ? `${n(d.m2_totales)} m² totales` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 /** Campos internos: nunca se muestran en la web ni se envían a la IA. */
 export const PRIVATE_DETAIL_KEYS = new Set(["ical_airbnb"]);
 
@@ -56,7 +74,6 @@ export const FICHA: SectionDef[] = [
         span: 2,
       },
       { key: "piso", label: "Piso", type: "text", placeholder: "9 de 15", span: 2 },
-      { key: "m2_totales", label: "m² totales (con terraza)", type: "number", span: 2 },
       { key: "orientacion", label: "Orientación", type: "text", placeholder: "Nor-poniente", span: 2 },
       { key: "vista", label: "Vista", type: "text", placeholder: "Vista al mar despejada", span: 2 },
       { key: "anio", label: "Año de construcción", type: "text", span: 2 },
@@ -322,11 +339,14 @@ export function detailsToText(modalities: Modality[], d: Details): string {
 
 /** Descripción de los campos para pedirle a la IA que lea un PDF. */
 export function extractionSchema(): string {
-  return FICHA.flatMap((s) =>
-    s.fields.filter((f) => !PRIVATE_DETAIL_KEYS.has(f.key)).map((f) => {
-      const opts = f.options ? ` — opciones: ${f.options.map((o) => `"${o}"`).join(" | ")}` : "";
-      const kind = f.type === "multi" ? " (lista)" : "";
-      return `"${f.key}": ${f.label}${kind}${opts}`;
-    }),
-  ).join("\n");
+  return [
+    ...SURFACE_FIELDS.map((f) => `"${f.key}": ${f.label} (número)`),
+    ...FICHA.flatMap((s) =>
+      s.fields.filter((f) => !PRIVATE_DETAIL_KEYS.has(f.key)).map((f) => {
+        const opts = f.options ? ` — opciones: ${f.options.map((o) => `"${o}"`).join(" | ")}` : "";
+        const kind = f.type === "multi" ? " (lista)" : "";
+        return `"${f.key}": ${f.label}${kind}${opts}`;
+      }),
+    ),
+  ].join("\n");
 }

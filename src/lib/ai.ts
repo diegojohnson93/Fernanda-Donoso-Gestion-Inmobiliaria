@@ -1,4 +1,4 @@
-import { MODALITIES, detailsToText, extractionSchema, priceLines } from "./ficha";
+import { MODALITIES, detailsToText, extractionSchema, priceLines, surfaceText } from "./ficha";
 import type {
   Confidence,
   ConversationWithMessages,
@@ -99,7 +99,7 @@ function propertyCard(p: Property, opts: { hideAddress?: boolean } = {}): string
     opts.hideAddress
       ? `Sector: ${p.sector || "?"}`
       : `Sector: ${p.sector || "?"} | Dirección: ${p.address || "?"}`,
-    `Dormitorios: ${p.bedrooms ?? "?"} | Baños: ${p.bathrooms ?? "?"} | Superficie útil: ${p.area_m2 ?? "?"} m²`,
+    `Dormitorios: ${p.bedrooms ?? "?"} | Baños: ${p.bathrooms ?? "?"} | Superficie: ${surfaceText(p.area_m2, p.details) || "?"}`,
     detailsToText(p.modalities, p.details),
     p.brief ? `[Información adicional]\n${p.brief}` : "",
     p.links ? `Links: ${p.links}` : "",
@@ -363,7 +363,7 @@ Responde ÚNICAMENTE con un JSON con esta forma:
   "address": "dirección o referencia",
   "bedrooms": número o null,
   "bathrooms": número o null,
-  "area_m2": superficie útil, número o null,
+  "area_m2": superficie útil (interior, sin terraza), número o null,
   "details": { ...campos de abajo que el documento mencione... },
   "brief": "todo dato útil que no calce en los campos, en líneas cortas"
 }

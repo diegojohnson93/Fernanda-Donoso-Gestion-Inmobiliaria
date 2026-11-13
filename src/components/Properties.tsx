@@ -200,7 +200,7 @@ export function Properties() {
                   {[
                     p.bedrooms && `${p.bedrooms}D`,
                     p.bathrooms && `${p.bathrooms}B`,
-                    p.area_m2 && `${p.area_m2} m²`,
+                    p.area_m2 && `${p.area_m2} m² útiles`,
                     p.sector,
                   ]
                     .filter(Boolean)
@@ -497,6 +497,20 @@ function PropertyEditor({
     </label>
   );
 
+  /** Campo de superficie guardado en la ficha (details), junto a los m² útiles. */
+  const surface = (label: string, key: string, placeholder?: string) => (
+    <label className={`col-span-6 block ${SPAN[2]}`}>
+      <span className="mb-1 block text-xs font-medium text-muted">{label}</span>
+      <input
+        className={inputClass}
+        value={typeof form.details[key] === "string" ? (form.details[key] as string) : ""}
+        placeholder={placeholder}
+        inputMode="decimal"
+        onChange={(e) => setDetail(key, e.target.value)}
+      />
+    </label>
+  );
+
   const sections = sectionsFor(form.modalities);
 
   return (
@@ -557,7 +571,10 @@ function PropertyEditor({
               {basic("Dirección o referencia", "address", 3, "Av. Borgoño altura 15.000")}
               {basic("Dormitorios", "bedrooms", 2)}
               {basic("Baños", "bathrooms", 2)}
-              {basic("m² útiles", "area_m2", 2)}
+              <div className="hidden sm:col-span-2 sm:block" />
+              {basic("m² útiles", "area_m2", 2, "Interior")}
+              {surface("m² terraza", "m2_terraza", "Terraza o balcón")}
+              {surface("m² totales", "m2_totales", "Útiles + terraza")}
             </div>
           </section>
 
