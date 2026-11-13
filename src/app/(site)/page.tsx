@@ -100,11 +100,13 @@ export default async function Home() {
               <Reveal
                 key={it.title}
                 delay={i * 90}
-                className="border-b border-charcoal/12 py-8 transition-colors duration-500 hover:bg-cream sm:px-7 lg:border-b-0 lg:border-r lg:last:border-r-0"
+                className="border-b border-charcoal/12 lg:border-b-0 lg:border-r lg:last:border-r-0"
               >
-                <span className="font-serif text-lg italic text-taupe">0{i + 1}</span>
-                <h3 className="mt-6 font-serif text-[28px] leading-tight">{it.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-graphite">{it.text}</p>
+                <div className="step-card py-8 sm:px-7">
+                  <span className="font-serif text-lg italic text-taupe">0{i + 1}</span>
+                  <h3 className="mt-6 font-serif text-[28px] leading-tight">{it.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-graphite">{it.text}</p>
+                </div>
               </Reveal>
             ))}
           </div>
@@ -169,11 +171,13 @@ export default async function Home() {
                 as="li"
                 key={st.title}
                 delay={i * 90}
-                className="border-b border-white/25 py-7 sm:pr-7 lg:border-b-0 lg:border-r lg:px-7 lg:first:pl-0 lg:last:border-r-0"
+                className="border-b border-white/25 lg:border-b-0 lg:border-r lg:last:border-r-0"
               >
-                <span className="font-serif text-lg italic text-white/60">0{i + 1}</span>
-                <h3 className="mt-5 font-serif text-3xl">{st.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-white/75">{st.text}</p>
+                <div className="step-card step-card-dark py-7 sm:px-7">
+                  <span className="font-serif text-lg italic text-white/60">0{i + 1}</span>
+                  <h3 className="mt-5 font-serif text-3xl">{st.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-white/75">{st.text}</p>
+                </div>
               </Reveal>
             ))}
           </ol>

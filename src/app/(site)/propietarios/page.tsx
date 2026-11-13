@@ -33,10 +33,12 @@ export default function OwnersPage() {
       <section className="px-5 md:px-12">
         <div className="mx-auto grid max-w-[1240px] border-t border-charcoal/15 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => (
-            <Reveal key={s.title} delay={i * 90} className="border-b border-charcoal/15 py-7 sm:px-7 md:py-8 lg:border-b-0 lg:border-r lg:last:border-r-0">
-              <span className="font-serif text-lg italic text-taupe">0{i + 1}</span>
-              <h2 className="mt-6 font-serif text-3xl">{s.title}</h2>
-              <p className="mt-3 text-sm leading-relaxed text-graphite">{s.text}</p>
+            <Reveal key={s.title} delay={i * 90} className="border-b border-charcoal/15 lg:border-b-0 lg:border-r lg:last:border-r-0">
+              <div className="step-card py-7 sm:px-7 md:py-8">
+                <span className="font-serif text-lg italic text-taupe">0{i + 1}</span>
+                <h2 className="mt-6 font-serif text-3xl">{s.title}</h2>
+                <p className="mt-3 text-sm leading-relaxed text-graphite">{s.text}</p>
+              </div>
             </Reveal>
           ))}
         </div>
