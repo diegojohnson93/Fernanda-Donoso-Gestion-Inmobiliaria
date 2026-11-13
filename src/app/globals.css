@@ -125,3 +125,7 @@ html.js [data-split]:not([data-ready]) {
     cursor: text !important;
   }
 }
+
+/* Evita palabras sueltas en la última línea */
+h1, h2, h3, blockquote, .font-serif { text-wrap: balance; }
+p { text-wrap: pretty; }
