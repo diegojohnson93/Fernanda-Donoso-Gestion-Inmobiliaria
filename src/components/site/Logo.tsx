@@ -12,9 +12,21 @@ export function Monogram({ className = "" }: { className?: string }) {
   );
 }
 
-export function Logo({ size = "md", className = "" }: { size?: "md" | "lg"; className?: string }) {
+export function Logo({
+  size = "md",
+  align = "center",
+  className = "",
+}: {
+  size?: "md" | "lg";
+  align?: "center" | "left";
+  className?: string;
+}) {
   return (
-    <span className={`inline-flex flex-col items-center text-center leading-none ${className}`}>
+    <span
+      className={`inline-flex flex-col leading-none ${
+        align === "left" ? "items-start text-left" : "items-center text-center"
+      } ${className}`}
+    >
       <span className={`block font-serif font-medium ${size === "lg" ? "text-[30px]" : "text-[22px] md:text-[24px]"}`}>
         Fernanda Donoso
       </span>

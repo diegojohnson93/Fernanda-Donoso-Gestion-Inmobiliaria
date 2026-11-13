@@ -7,7 +7,7 @@ export function SiteFooter() {
     <footer className="bg-charcoal px-5 pb-28 pt-16 text-sand md:px-12 md:pb-16">
       <div className="mx-auto grid max-w-[1340px] gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <Logo />
+          <Logo align="left" />
           <p className="mt-5 max-w-xs text-sm text-sand/70">
             Arriendos y ventas en {SITE.zone}.
           </p>
