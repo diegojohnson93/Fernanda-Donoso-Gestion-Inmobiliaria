@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
+import { ImageReveal } from "@/components/site/ImageReveal";
 import { Label } from "@/components/site/Label";
 import { MarqueeText } from "@/components/site/Marquee";
 import { CountUp, SplitReveal } from "@/components/site/Motion";
@@ -65,14 +66,18 @@ export default async function AboutPage() {
 
       {/* Fernanda */}
       <section className="bg-white px-5 py-28 md:px-12 md:py-40">
-        <div className="mx-auto grid max-w-[1240px] gap-14 md:grid-cols-[1fr_1.4fr] md:gap-24">
-          <div>
+        <div className="mx-auto grid max-w-[1240px] items-start gap-14 md:grid-cols-[1fr_1.15fr] md:gap-20">
+          <ImageReveal
+            src="/images/fernanda.webp"
+            alt="Fernanda Donoso"
+            position="50% 20%"
+            className="aspect-[4/5] w-full md:sticky md:top-16"
+          />
+          <div className="md:pt-6">
             <Label>{SITE.about.eyebrow}</Label>
-            <SplitReveal as="h2" type="chars" className="mt-4 font-serif text-[56px] font-light leading-[0.95] md:text-[96px]">
+            <SplitReveal as="h2" type="chars" className="mb-10 mt-4 font-serif text-[56px] font-light leading-[0.95] md:text-[88px]">
               {SITE.about.title}
             </SplitReveal>
-          </div>
-          <div>
             {SITE.about.paragraphs.map((t, i) => (
               <SplitReveal key={i} as="p" delay={i * 120} className="mb-6 text-[17px] leading-relaxed text-graphite">
                 {t}

@@ -9,6 +9,7 @@ import { ScaleImage } from "@/components/site/ScaleImage";
 import { ScrollText } from "@/components/site/ScrollText";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { ImageReveal } from "@/components/site/ImageReveal";
 import { Label } from "@/components/site/Label";
 import { getPublishedProperties } from "@/lib/public";
 import { CATEGORIES, SITE, whatsappLink } from "@/lib/site";
@@ -206,14 +207,22 @@ export default async function Home() {
 
       {/* Nosotros (resumen) */}
       <section className="bg-white px-5 py-28 md:px-12 md:py-40">
-        <div className="mx-auto grid max-w-[1240px] gap-8 md:grid-cols-[1fr_3fr]">
-          <Label>Nosotros</Label>
+        <div className="mx-auto grid max-w-[1240px] gap-10 md:grid-cols-[1fr_2.2fr] md:gap-16">
           <div>
+            <Label>Nosotros</Label>
+            <ImageReveal
+              src="/images/fernanda.webp"
+              alt="Fernanda Donoso"
+              position="50% 20%"
+              className="mt-6 aspect-[4/5] w-full max-w-sm"
+            />
+          </div>
+          <div className="md:pt-10">
             <SplitReveal
               as="p"
               type="lines"
               indent="22%"
-              className="text-[26px] font-medium leading-[1.16] tracking-[-0.015em] md:text-[44px]"
+              className="text-[26px] font-medium leading-[1.16] tracking-[-0.015em] md:text-[38px]"
             >
               {SITE.about.paragraphs[0]}
             </SplitReveal>

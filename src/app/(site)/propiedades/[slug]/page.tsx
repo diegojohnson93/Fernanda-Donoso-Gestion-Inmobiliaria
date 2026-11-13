@@ -24,14 +24,20 @@ export default async function CategoryPage({ params }: PageProps<"/propiedades/[
   const c = categoryBySlug((await params).slug);
   if (!c) notFound();
   const list = (await getPublishedProperties()).filter((p) => p.modalities.includes(c.modality));
-  const cover = list.find((p) => p.photos[0])?.photos[0].url ?? null;
 
   return (
     <>
       <section className={`relative flex min-h-[100svh] flex-col ${c.bg} text-cream`}>
         <SiteHeader tone="light" />
         <div className="flex flex-1 flex-col justify-center">
-          <MarqueeHero text={c.title} image={cover} tone="light" fallbackBg="bg-cream/15" />
+          <MarqueeHero
+            text={c.title}
+            image="/images/fernanda.webp"
+            imageAlt="Fernanda Donoso"
+            imagePosition="50% 22%"
+            tone="light"
+            fallbackBg="bg-cream/15"
+          />
           <div className="px-5 pb-24 text-center md:pb-14">
             <p className="mx-auto max-w-lg text-[15px] font-medium leading-relaxed md:text-[17px]">{c.lead}</p>
             <p className="eyebrow mx-auto mt-5 inline-block border border-cream/70 px-3 py-1.5 !text-[9.5px]">
