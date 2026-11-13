@@ -1,4 +1,5 @@
-import { FICHA, MODALITIES, priceLines, type Details, type Modality } from "./ficha";
+import { airbnbBusyNights, type Availability } from "./airbnb-calendar";
+import { FICHA, MODALITIES, PRIVATE_DETAIL_KEYS, priceLines, type Details, type Modality } from "./ficha";
 import { getStore } from "./store";
 import type { Photo, Property } from "./types";
 
@@ -37,7 +38,7 @@ function toPublic(p: Property): PublicProperty {
     bedrooms: p.bedrooms,
     bathrooms: p.bathrooms,
     area_m2: p.area_m2,
-    details: p.details ?? {},
+    details: Object.fromEntries(Object.entries(p.details ?? {}).filter(([k]) => !PRIVATE_DETAIL_KEYS.has(k))),
     description: p.web_description,
     photos: p.photos ?? [],
     featured: Boolean(p.featured),
@@ -56,6 +57,18 @@ export async function getPublishedProperties(): Promise<PublicProperty[]> {
 export async function getPublishedProperty(slug: string): Promise<PublicProperty | null> {
   const all = await getPublishedProperties();
   return all.find((p) => p.slug === slug.toLowerCase()) ?? null;
+}
+
+/**
+ * Noches ocupadas según el calendario de Airbnb de la propiedad (solo en el
+ * servidor: el enlace del calendario es privado y no llega al navegador).
+ */
+export async function getAirbnbAvailability(code: string): Promise<Availability | null> {
+  const all = await getStore().listProperties();
+  const p = all.find((x) => x.active && x.published && x.code.toLowerCase() === code.toLowerCase());
+  const url = p?.details?.ical_airbnb;
+  if (!p || !p.modalities?.includes("airbnb") || typeof url !== "string" || !url.trim()) return null;
+  return airbnbBusyNights(url.trim());
 }
 
 /* ------------------------------------------------------------------------ */

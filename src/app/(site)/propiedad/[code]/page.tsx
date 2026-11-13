@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AvailabilityCalendar } from "@/components/site/AvailabilityCalendar";
 import { ContactForm } from "@/components/site/Forms";
 import { Gallery } from "@/components/site/Gallery";
 import { Reveal } from "@/components/site/Reveal";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { detailSections, factsLine, getPublishedProperty, priceFor } from "@/lib/public";
+import { detailSections, factsLine, getAirbnbAvailability, getPublishedProperty, priceFor } from "@/lib/public";
 import { SITE, categoryFor, whatsappLink } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/propiedad/[code]">): Promise<Metadata> {
@@ -34,7 +35,13 @@ export default async function PropertyPage({ params }: PageProps<"/propiedad/[co
   const p = await getPublishedProperty((await params).code);
   if (!p) notFound();
   const sections = detailSections(p);
-  const waText = `Hola Fernanda, quiero consultar por ${p.code} — ${p.title}`;
+  const isAirbnb = p.modalities.includes("airbnb");
+  const onlyAirbnb = isAirbnb && p.modalities.length === 1;
+  const availability = isAirbnb ? await getAirbnbAvailability(p.code) : null;
+  const minNights = typeof p.details.minimo_noches === "string" ? p.details.minimo_noches : undefined;
+  const waText = isAirbnb
+    ? `Hola Fernanda, quiero reservar ${p.code} — ${p.title}. ¿Qué fechas tienes disponibles?`
+    : `Hola Fernanda, quiero consultar por ${p.code} — ${p.title}`;
 
   return (
     <>
@@ -82,6 +89,18 @@ export default async function PropertyPage({ params }: PageProps<"/propiedad/[co
                 </Reveal>
               )}
 
+              {isAirbnb && (
+                <Reveal className="mt-14">
+                  <AvailabilityCalendar
+                    busy={availability?.busy ?? []}
+                    synced={Boolean(availability)}
+                    code={p.code}
+                    title={p.title}
+                    minNights={minNights}
+                  />
+                </Reveal>
+              )}
+
               <div className="mt-14 space-y-12">
                 {sections.map((s) => (
                   <Reveal key={s.id}>
@@ -119,20 +138,12 @@ export default async function PropertyPage({ params }: PageProps<"/propiedad/[co
                   rel="noreferrer"
                   className="eyebrow mt-8 flex h-12 items-center justify-center bg-charcoal text-cream transition hover:bg-graphite"
                 >
-                  Consultar por WhatsApp
+                  {isAirbnb ? "Reservar por WhatsApp" : "Consultar por WhatsApp"}
                 </a>
-                {p.modalities.includes("airbnb") && typeof p.details.link_airbnb === "string" && p.details.link_airbnb && (
-                  <a
-                    href={p.details.link_airbnb}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="eyebrow mt-2 flex h-12 items-center justify-center border border-charcoal transition hover:bg-charcoal hover:text-cream"
-                  >
-                    Ver en Airbnb
-                  </a>
-                )}
                 <p className="mt-4 text-xs leading-relaxed text-stone">
-                  ¿Quieres saber si te conviene? La primera asesoría es gratis.
+                  {onlyAirbnb
+                    ? "Reserva directo con nosotros, sin las comisiones de la plataforma."
+                    : "¿Quieres saber si te conviene? La primera asesoría es gratis."}
                 </p>
               </div>
               <div className="mt-8 border border-charcoal/15 p-6 md:p-8">
@@ -153,7 +164,7 @@ export default async function PropertyPage({ params }: PageProps<"/propiedad/[co
         rel="noreferrer"
         className="eyebrow fixed bottom-4 left-4 z-40 flex h-11 items-center bg-charcoal px-4 !text-[10px] text-cream shadow-lg lg:hidden"
       >
-        WhatsApp
+        {isAirbnb ? "Reservar" : "WhatsApp"}
       </a>
       <SiteFooter />
     </>

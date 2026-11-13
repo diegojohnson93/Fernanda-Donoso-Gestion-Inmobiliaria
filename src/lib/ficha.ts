@@ -30,6 +30,9 @@ export interface FieldDef {
   span?: 2 | 3 | 4 | 6;
 }
 
+/** Campos internos: nunca se muestran en la web ni se envían a la IA. */
+export const PRIVATE_DETAIL_KEYS = new Set(["ical_airbnb"]);
+
 export interface SectionDef {
   id: string;
   title: string;
@@ -132,6 +135,14 @@ export const FICHA: SectionDef[] = [
         span: 3,
       },
       { key: "link_airbnb", label: "Link del anuncio en Airbnb", type: "text", span: 3 },
+      {
+        key: "ical_airbnb",
+        label: "Calendario de Airbnb (enlace .ics)",
+        type: "text",
+        placeholder: "https://www.airbnb.cl/calendar/ical/….ics?s=…",
+        help: "En Airbnb: Calendario → Disponibilidad → Conectar calendarios → Exportar calendario. Copia el enlace que termina en .ics. Es privado: no se muestra en la web.",
+        span: 6,
+      },
       {
         key: "reglas",
         label: "Reglas de la casa",
@@ -297,6 +308,7 @@ export function detailsToText(modalities: Modality[], d: Details): string {
   const lines: string[] = [];
   for (const section of sectionsFor(modalities)) {
     const filled = section.fields
+      .filter((f) => !PRIVATE_DETAIL_KEYS.has(f.key))
       .map((f) => {
         const v = d[f.key];
         if (!v || (Array.isArray(v) && !v.length)) return null;
@@ -311,7 +323,7 @@ export function detailsToText(modalities: Modality[], d: Details): string {
 /** Descripción de los campos para pedirle a la IA que lea un PDF. */
 export function extractionSchema(): string {
   return FICHA.flatMap((s) =>
-    s.fields.map((f) => {
+    s.fields.filter((f) => !PRIVATE_DETAIL_KEYS.has(f.key)).map((f) => {
       const opts = f.options ? ` — opciones: ${f.options.map((o) => `"${o}"`).join(" | ")}` : "";
       const kind = f.type === "multi" ? " (lista)" : "";
       return `"${f.key}": ${f.label}${kind}${opts}`;
