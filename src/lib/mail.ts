@@ -13,6 +13,15 @@ export function mailEnabled(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
 }
 
+/**
+ * ¿Los correos pueden llegar a cualquier cliente? Solo cuando el remitente es
+ * un dominio propio verificado en Resend (no el provisorio onboarding@resend.dev).
+ */
+export function mailToAnyone(): boolean {
+  const from = process.env.MAIL_FROM?.trim() ?? "";
+  return mailEnabled() && Boolean(from) && !/resend\.dev/i.test(from);
+}
+
 export function notifyEmail(): string | null {
   return process.env.NOTIFY_EMAIL?.trim() || null;
 }

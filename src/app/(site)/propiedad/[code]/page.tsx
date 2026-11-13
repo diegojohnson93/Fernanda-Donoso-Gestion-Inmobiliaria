@@ -7,7 +7,7 @@ import { Gallery } from "@/components/site/Gallery";
 import { Reveal } from "@/components/site/Reveal";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { mailEnabled } from "@/lib/mail";
+import { mailToAnyone } from "@/lib/mail";
 import { detailSections, factsLine, getAirbnbAvailability, getPublishedProperty, priceFor } from "@/lib/public";
 import { SITE, categoryFor, whatsappLink } from "@/lib/site";
 
@@ -98,7 +98,7 @@ export default async function PropertyPage({ params }: PageProps<"/propiedad/[co
                     code={p.code}
                     title={p.title}
                     minNights={minNights}
-                    requestEnabled={mailEnabled()}
+                    requestEnabled={mailToAnyone()}
                   />
                 </Reveal>
               )}
