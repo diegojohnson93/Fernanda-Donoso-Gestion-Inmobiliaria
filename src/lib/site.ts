@@ -61,7 +61,7 @@ export const SITE = {
     eyebrow: "Nuestra mirada",
     quote:
       "Para nosotros, una propiedad es mucho más que metros cuadrados. Es todo lo que la rodea: las personas que la habitan, el barrio que la envuelve y la forma en que un espacio se integra a una vida que ya está en movimiento. Para eso trabajamos, en la costa que conocemos bien.",
-    text: "Las propiedades son un equilibrio entre seguridad e inversión inteligente que se paga sola. En muchos casos es posible comprar aunque no tengas el 100% del pie, y casi siempre hay espacio para negociar.",
+    text: "Una propiedad bien elegida une la tranquilidad de un bien real con la inteligencia de una inversión que, mes a mes, se va pagando sola. Y el camino suele estar más cerca de lo que imaginas: muchas veces es posible dar el paso sin tener todo el pie reunido, y siempre vale la pena conversar las condiciones.",
   },
 
   /** Página Nosotros. */
