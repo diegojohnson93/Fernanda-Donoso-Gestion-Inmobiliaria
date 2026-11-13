@@ -22,7 +22,9 @@ export default function AboutPage() {
     <>
       {/* Portada con foto a todo el ancho y texto gigante en blanco */}
       <section className="relative flex h-[100svh] min-h-[560px] flex-col overflow-hidden bg-taupe text-white">
-        <img src={heroPhoto} alt="Reñaca, Viña del Mar" className="photo-tone absolute inset-0 h-full w-full object-cover" />
+        <div className="ken-burns absolute inset-0">
+          <img src={heroPhoto} alt="Reñaca, Viña del Mar" className="photo-tone absolute inset-0 h-full w-full object-cover" />
+        </div>
         <PhotoToneLayers />
         <div className="relative">
           <SiteHeader tone="light" />

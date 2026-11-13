@@ -53,13 +53,16 @@ export function PhotoHero({
 
   return (
     <section ref={section} className="relative flex h-[100svh] min-h-[560px] flex-col overflow-hidden bg-charcoal text-white">
-      <img
-        ref={img}
-        src={image}
-        alt={imageAlt}
-        className="photo-tone absolute inset-0 h-full w-full origin-center object-cover"
-        style={{ objectPosition: imagePosition }}
-      />
+      {/* Movimiento lento continuo (zoom + desplazamiento lateral) */}
+      <div className="ken-burns absolute inset-0">
+        <img
+          ref={img}
+          src={image}
+          alt={imageAlt}
+          className="photo-tone absolute inset-0 h-full w-full origin-center object-cover"
+          style={{ objectPosition: imagePosition }}
+        />
+      </div>
       <PhotoToneLayers />
       <div className="relative z-10">{header}</div>
       <div ref={title} className="relative flex flex-1 items-center">

@@ -132,3 +132,16 @@ p { text-wrap: pretty; }
 
 /* Tratamiento común de las fotos de portada: menos saturación, más cálidas */
 .photo-tone { filter: saturate(0.72) sepia(0.18) contrast(0.96); }
+
+/* Movimiento sutil de las fotos de portada: zoom lento con desplazamiento lateral */
+@keyframes ken-burns {
+  0% { transform: scale(1.04) translate3d(-1.5%, 0, 0); }
+  100% { transform: scale(1.12) translate3d(1.5%, -1%, 0); }
+}
+.ken-burns {
+  animation: ken-burns 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ken-burns { animation: none; }
+}
