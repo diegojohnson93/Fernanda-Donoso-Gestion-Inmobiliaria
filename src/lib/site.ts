@@ -47,7 +47,7 @@ export const SITE = {
         text: "Comprar, arrendar o invertir: te mostramos los números y las alternativas que tienes.",
       },
       {
-        title: "Buscamos y negociamos",
+        title: "Buscamos y cotizamos",
         text: "Seleccionamos propiedades a tu medida y negociamos las mejores condiciones.",
       },
       {
