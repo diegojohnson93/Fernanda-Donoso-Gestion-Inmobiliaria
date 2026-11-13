@@ -31,7 +31,7 @@ export function ScrollText({ text, className = "" }: { text: string; className?:
   }, []);
 
   return (
-    <p ref={ref} className={className} style={{ textIndent: "22%" }}>
+    <p ref={ref} className={className}>
       {text.split(" ").map((w, i) => (
         <span key={i} data-w>
           {w}{" "}
