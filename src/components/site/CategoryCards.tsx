@@ -39,7 +39,7 @@ export function CategoryCards({
                 </span>
               </div>
               { }
-              {cover && <img src={cover} alt="" className="w-24 object-cover" />}
+              {cover && <img src={cover} alt="" className="w-24 object-cover opacity-[0.12] grayscale contrast-75 mix-blend-luminosity" />}
             </Link>
           ))}
         </div>
@@ -79,7 +79,7 @@ export function CategoryCards({
                 <img
                   src={cover}
                   alt=""
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="h-full w-full object-cover opacity-[0.07] grayscale contrast-75 mix-blend-luminosity transition-[transform,opacity] duration-700 group-hover:scale-105 group-hover:opacity-[0.12]"
                 />
               ) : (
                 <div
