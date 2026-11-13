@@ -48,38 +48,8 @@ export default async function Home() {
         <p className="absolute bottom-10 left-12 hidden text-xs text-stone md:block">(Scroll)</p>
       </section>
 
-      {/* Propiedades disponibles: lo primero que ve el cliente */}
-      <section id="propiedades" className="scroll-mt-10 bg-white px-5 pb-28 pt-16 md:px-12 md:pb-40 md:pt-24">
-        <div className="mx-auto max-w-[1340px]">
-          <div className="mb-10 grid gap-6 md:mb-14 md:grid-cols-[1fr_2fr] md:items-end">
-            <Label>Propiedades</Label>
-            <div>
-              <SplitReveal as="h2" type="chars" className="font-serif text-[52px] font-light leading-[0.95] md:text-[96px]">
-                Disponibles hoy
-              </SplitReveal>
-              <SplitReveal as="p" delay={200} className="mt-5 max-w-md text-[15px] leading-relaxed text-graphite">
-                Elige una modalidad y revisa las propiedades que tenemos para ti. ¿No sabes cuál te conviene? Te
-                asesoramos gratis.
-              </SplitReveal>
-            </div>
-          </div>
-          <PropertyBrowser properties={properties} />
-        </div>
-      </section>
-
-      {/* Foto que crece */}
-      <ScaleImage src="/images/vina-del-mar.webp" alt="Viña del Mar, estero Marga Marga" />
-
-      {/* Declaración */}
-      <section className="bg-white px-5 pb-10 pt-28 md:px-12 md:pt-40">
-        <ScrollText
-          text={SITE.statement}
-          className="mx-auto max-w-[1180px] text-[28px] font-medium leading-[1.14] tracking-[-0.015em] md:text-[54px]"
-        />
-      </section>
-
       {/* Modalidades: las cuatro tarjetas */}
-      <section className="bg-white px-5 pb-10 pt-28 md:px-12 md:pt-36">
+      <section className="bg-white px-5 pb-28 pt-16 md:px-12 md:pb-36 md:pt-24">
         <div className="mx-auto max-w-[1340px]">
           <div className="mb-10 grid gap-6 md:mb-14 md:grid-cols-[1fr_2fr] md:items-end">
             <Label>Modalidades</Label>
@@ -95,6 +65,36 @@ export default async function Home() {
           <Reveal>
             <CategoryCards items={categories} />
           </Reveal>
+        </div>
+      </section>
+
+      {/* Foto que crece */}
+      <ScaleImage src="/images/vina-del-mar.webp" alt="Viña del Mar, estero Marga Marga" />
+
+      {/* Declaración */}
+      <section className="bg-white px-5 pb-10 pt-28 md:px-12 md:pt-40">
+        <ScrollText
+          text={SITE.statement}
+          className="mx-auto max-w-[1180px] text-[28px] font-medium leading-[1.14] tracking-[-0.015em] md:text-[54px]"
+        />
+      </section>
+
+      {/* Propiedades disponibles: lo primero que ve el cliente */}
+      <section id="propiedades" className="scroll-mt-10 bg-white px-5 pb-10 pt-28 md:px-12 md:pt-36">
+        <div className="mx-auto max-w-[1340px]">
+          <div className="mb-10 grid gap-6 md:mb-14 md:grid-cols-[1fr_2fr] md:items-end">
+            <Label>Propiedades</Label>
+            <div>
+              <SplitReveal as="h2" type="chars" className="font-serif text-[52px] font-light leading-[0.95] md:text-[96px]">
+                Disponibles hoy
+              </SplitReveal>
+              <SplitReveal as="p" delay={200} className="mt-5 max-w-md text-[15px] leading-relaxed text-graphite">
+                Elige una modalidad y revisa las propiedades que tenemos para ti. ¿No sabes cuál te conviene? Te
+                asesoramos gratis.
+              </SplitReveal>
+            </div>
+          </div>
+          <PropertyBrowser properties={properties} />
         </div>
       </section>
 
