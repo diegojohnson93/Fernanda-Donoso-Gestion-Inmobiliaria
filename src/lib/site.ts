@@ -122,6 +122,8 @@ export interface Category {
   bg: string;
   fg: string;
   hex: string;
+  /** Foto de la portada, que crece con el scroll. */
+  image: string;
 }
 
 export const CATEGORIES: Category[] = [
@@ -134,6 +136,7 @@ export const CATEGORIES: Category[] = [
     bg: "bg-cat-airbnb",
     fg: "text-cream",
     hex: "#8b9784",
+    image: "/images/renaca.webp",
   },
   {
     modality: "temporada",
@@ -144,6 +147,7 @@ export const CATEGORIES: Category[] = [
     bg: "bg-cat-temporada",
     fg: "text-cream",
     hex: "#a8887f",
+    image: "/images/vina-del-mar.webp",
   },
   {
     modality: "anual",
@@ -154,6 +158,7 @@ export const CATEGORIES: Category[] = [
     bg: "bg-cat-anual",
     fg: "text-cream",
     hex: "#6c7470",
+    image: "/images/vina-del-mar.webp",
   },
   {
     modality: "venta",
@@ -164,6 +169,7 @@ export const CATEGORIES: Category[] = [
     bg: "bg-cat-venta",
     fg: "text-cream",
     hex: "#2d2a27",
+    image: "/images/renaca.webp",
   },
 ];
 
