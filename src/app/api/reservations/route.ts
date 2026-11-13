@@ -36,6 +36,7 @@ export async function POST(request: Request) {
       status: paid ? "pagada" : "pendiente",
       source: "manual",
       amount: paid ? cleanText(body.amount, 60) : "",
+      total: cleanText(body.total, 60),
       guest_note: paid ? cleanText(body.guest_note, 1500) : "",
       paid_at: paid ? new Date().toISOString() : null,
       reminder_sent_at: null,

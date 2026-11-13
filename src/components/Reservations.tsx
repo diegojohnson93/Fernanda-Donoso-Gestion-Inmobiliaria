@@ -33,6 +33,18 @@ const today = () =>
     new Date(),
   );
 
+const clp = (v: string) => {
+  const d = (v ?? "").replace(/[^\d]/g, "");
+  return d ? Number(d) : null;
+};
+const fmt = (n: number) => `$${n.toLocaleString("es-CL")}`;
+/** Saldo pendiente (total − recibido), o null si falta alguno. */
+const balance = (amount: string, total: string) => {
+  const t = clp(total);
+  const a = clp(amount);
+  return t === null || a === null ? null : Math.max(0, t - a);
+};
+
 const STATUS: Record<ReservationStatus, { label: string; className: string }> =
   {
     pendiente: {
@@ -227,6 +239,9 @@ function Card({
 }) {
   const [paying, setPaying] = useState(false);
   const [amount, setAmount] = useState(r.amount);
+  const [total, setTotal] = useState(r.total);
+  const preview = balance(amount, total);
+  const bal = balance(r.amount, r.total);
   const [note, setNote] = useState(r.guest_note);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -268,7 +283,9 @@ function Card({
               {r.property_code}
             </span>
             <Pill className={STATUS[r.status].className}>
-              {STATUS[r.status].label}
+              {r.status === "pagada" && bal
+                ? "Abono pagado"
+                : STATUS[r.status].label}
             </Pill>
             {r.source === "web" && (
               <Pill className="bg-[#eef1f6] text-[#4b5b78]">Desde la web</Pill>
@@ -313,7 +330,11 @@ function Card({
           )}
           {r.status === "pagada" && (
             <p className="mt-2 text-xs text-muted">
-              {r.amount ? `Pagó ${r.amount}. ` : ""}
+              {r.amount
+                ? bal
+                  ? `Abonó ${r.amount} de ${r.total}. Saldo al llegar: ${fmt(bal)}. `
+                  : `Pagó ${r.amount}${r.total && r.total !== r.amount ? ` (total ${r.total})` : ""}. `
+                : ""}
               {r.reminder_sent_at
                 ? "Recordatorio de llegada enviado."
                 : "El recordatorio se envía solo 2 días antes."}
@@ -377,7 +398,18 @@ function Card({
       </div>
 
       {paying && (
-        <div className="mt-4 grid gap-3 rounded-lg bg-[#f6f7f9] p-3 sm:grid-cols-[180px_1fr_auto] sm:items-end">
+        <div className="mt-4 grid gap-3 rounded-lg bg-[#f6f7f9] p-3 sm:grid-cols-[150px_150px_1fr_auto] sm:items-end">
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-muted">
+              Total de la estadía
+            </span>
+            <input
+              className={inputClass}
+              value={total}
+              placeholder="$180.000"
+              onChange={(e) => setTotal(e.target.value)}
+            />
+          </label>
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-muted">
               Monto recibido
@@ -385,7 +417,7 @@ function Card({
             <input
               className={inputClass}
               value={amount}
-              placeholder="$180.000"
+              placeholder="$60.000"
               onChange={(e) => setAmount(e.target.value)}
             />
           </label>
@@ -403,10 +435,15 @@ function Card({
           <Button
             variant="primary"
             disabled={busy}
-            onClick={() => act("pagada", { amount, guest_note: note })}
+            onClick={() => act("pagada", { amount, total, guest_note: note })}
           >
             {busy ? "Enviando…" : "Confirmar y enviar correo"}
           </Button>
+          <p className="text-xs text-muted sm:col-span-4">
+            {preview
+              ? `Es un abono: el correo le indicará que paga el saldo de ${fmt(preview)} al llegar.`
+              : "Si cobras solo la reserva, anota el total y lo recibido: el correo le indicará el saldo a pagar al llegar."}
+          </p>
         </div>
       )}
       {err && <p className="mt-3 text-sm text-bad">{err}</p>}
@@ -432,6 +469,7 @@ function NewReservation({
     email: "",
     message: "",
     paid: true,
+    total: "",
     amount: "",
     guest_note: "",
   });
@@ -546,10 +584,9 @@ function NewReservation({
         </label>
         {f.paid && (
           <>
-            {field("Monto recibido", "amount", "text", "$180.000")}
-            <div className="sm:col-span-2">
-              {field("Nota para el huésped (opcional)", "guest_note")}
-            </div>
+            {field("Total de la estadía", "total", "text", "$180.000")}
+            {field("Monto recibido", "amount", "text", "$60.000")}
+            {field("Nota para el huésped (opcional)", "guest_note")}
           </>
         )}
       </div>

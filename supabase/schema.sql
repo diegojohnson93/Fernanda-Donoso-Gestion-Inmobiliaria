@@ -90,6 +90,7 @@ create table if not exists reservations (
   status text not null default 'pendiente' check (status in ('pendiente', 'pagada', 'cancelada')),
   source text not null default 'web' check (source in ('web', 'manual')),
   amount text not null default '',
+  total text not null default '',
   guest_note text not null default '',
   paid_at timestamptz,
   reminder_sent_at timestamptz,

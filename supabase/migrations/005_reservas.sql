@@ -16,6 +16,7 @@ create table if not exists reservations (
   status text not null default 'pendiente' check (status in ('pendiente', 'pagada', 'cancelada')),
   source text not null default 'web' check (source in ('web', 'manual')),
   amount text not null default '',
+  total text not null default '',
   guest_note text not null default '',
   paid_at timestamptz,
   reminder_sent_at timestamptz,
@@ -28,3 +29,6 @@ create index if not exists reservations_check_in_idx on reservations (check_in);
 create index if not exists reservations_property_idx on reservations (property_id, status);
 
 alter table reservations enable row level security;
+
+-- Si ya ejecutaste una versión anterior de este archivo:
+alter table reservations add column if not exists total text not null default '';

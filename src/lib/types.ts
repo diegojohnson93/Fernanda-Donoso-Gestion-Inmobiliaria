@@ -142,8 +142,10 @@ export interface Reservation {
   message: string;
   status: ReservationStatus;
   source: ReservationSource;
-  /** Monto pagado, como lo escribe Fernanda ("$180.000") */
+  /** Monto recibido (abono o total), como lo escribe Fernanda ("$60.000") */
   amount: string;
+  /** Valor total de la estadía ("$180.000"); vacío si no se informó */
+  total: string;
   /** Nota para el huésped que va en el correo de confirmación */
   guest_note: string;
   paid_at: string | null;

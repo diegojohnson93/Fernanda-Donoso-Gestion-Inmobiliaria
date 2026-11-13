@@ -36,6 +36,35 @@ export function todayChile(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
 }
 
+/* ------------------------------------------------------------------------ */
+/* Montos                                                                    */
+/* ------------------------------------------------------------------------ */
+
+/** "$180.000" → 180000 (pesos chilenos). null si no hay un número claro. */
+export function parseCLP(v: string): number | null {
+  const digits = (v ?? "").replace(/[^\d]/g, "");
+  return digits ? Number(digits) : null;
+}
+export const formatCLP = (n: number) => `$${n.toLocaleString("es-CL")}`;
+
+/** Saldo pendiente (total − recibido), o null si no se puede calcular. */
+export function balanceOf(r: { amount: string; total: string }): number | null {
+  const total = parseCLP(r.total);
+  const paid = parseCLP(r.amount);
+  if (total === null || paid === null) return null;
+  return Math.max(0, total - paid);
+}
+
+/** Filas de montos para los correos. */
+function moneyRows(r: Reservation): MailRow[] {
+  const bal = balanceOf(r);
+  return [
+    { label: "Total de la estadía", value: r.total },
+    { label: bal ? "Abono recibido" : "Monto recibido", value: r.amount },
+    { label: "Saldo a pagar al llegar", value: bal ? formatCLP(bal) : "" },
+  ];
+}
+
 /** Noches ocupadas por reservas pagadas de una propiedad (bloquean el calendario de la web). */
 export async function paidNights(propertyId: string): Promise<string[]> {
   const all = await getStore().listReservations();
@@ -162,8 +191,11 @@ function whatsappContact(phone: string) {
 /** 2. Al huésped (y copia a Fernanda): pago recibido, reserva confirmada. */
 export async function mailConfirmation(r: Reservation, p: Property | null): Promise<MailResult> {
   const title = "¡Tu reserva está confirmada!";
-  const intro = `Hola ${r.name.split(" ")[0]}, recibimos tu pago. Te dejamos el detalle de tu estadía; guarda este correo como comprobante.`;
-  const rows: MailRow[] = [...stayRows(r), { label: "Monto recibido", value: r.amount }];
+  const bal = balanceOf(r);
+  const intro = bal
+    ? `Hola ${r.name.split(" ")[0]}, recibimos el abono de tu reserva. El saldo de ${formatCLP(bal)} se paga al llegar. Te dejamos el detalle de tu estadía; guarda este correo como comprobante.`
+    : `Hola ${r.name.split(" ")[0]}, recibimos tu pago. Te dejamos el detalle de tu estadía; guarda este correo como comprobante.`;
+  const rows: MailRow[] = [...stayRows(r), ...moneyRows(r)];
   const info = stayInfo(p, { address: true });
   if (r.guest_note.trim()) {
     info.html.push({ title: "Nota de Fernanda", html: nl2br(r.guest_note.trim()) });
@@ -183,14 +215,15 @@ export async function mailReminder(r: Reservation, p: Property | null): Promise<
   const days = nightsOf({ check_in: todayChile(), check_out: r.check_in });
   const when = days <= 0 ? "hoy" : days === 1 ? "mañana" : `el ${longDate(r.check_in)}`;
   const title = `Te esperamos ${when}`;
-  const intro = `Hola ${r.name.split(" ")[0]}, ya falta poco para tu estadía en ${r.property_title}. Aquí tienes todo lo necesario para llegar.`;
+  const bal = balanceOf(r);
+  const intro = `Hola ${r.name.split(" ")[0]}, ya falta poco para tu estadía en ${r.property_title}. Aquí tienes todo lo necesario para llegar.${bal ? `\nRecuerda que el saldo de ${formatCLP(bal)} se paga al llegar.` : ""}`;
   const info = stayInfo(p, { address: true });
   return sendMail({
     to: r.email,
     replyTo: notifyEmail(),
     subject: `Tu llegada ${when} · ${r.property_title}`,
-    html: layout({ title, intro, rows: stayRows(r), blocks: info.html, cta: guestWhatsapp(r), footer: footer() }),
-    text: plain({ title, intro, rows: stayRows(r), blocks: info.text, footer: footer() }),
+    html: layout({ title, intro, rows: [...stayRows(r), ...moneyRows(r)], blocks: info.html, cta: guestWhatsapp(r), footer: footer() }),
+    text: plain({ title, intro, rows: [...stayRows(r), ...moneyRows(r)], blocks: info.text, footer: footer() }),
   });
 }
 
@@ -233,10 +266,11 @@ export async function createReservation(input: ReservationInput): Promise<Action
   return { reservation: r, emails };
 }
 
-export async function markPaid(id: string, amount: string, note: string): Promise<ActionResult> {
+export async function markPaid(id: string, amount: string, total: string, note: string): Promise<ActionResult> {
   const r = await getStore().updateReservation(id, {
     status: "pagada",
     amount: amount.trim(),
+    total: total.trim(),
     guest_note: note.trim(),
     paid_at: new Date().toISOString(),
   });

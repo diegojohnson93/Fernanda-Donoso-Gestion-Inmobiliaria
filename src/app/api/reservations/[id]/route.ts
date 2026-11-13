@@ -5,7 +5,7 @@ import { getStore } from "@/lib/store";
 
 /**
  * Acciones sobre una reserva:
- *  - "pagada": registra el pago y envía la confirmación al huésped (copia a Fernanda).
+ *  - "pagada": registra el pago (abono o total) y envía la confirmación al huésped (copia a Fernanda).
  *  - "recordatorio": envía ahora el correo con las instrucciones de llegada.
  *  - "cancelar" / "pendiente": cambia el estado (sin correo).
  */
@@ -21,7 +21,7 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/reservatio
         if (current.property_id && (await overlapsPaid(current.property_id, current.check_in, current.check_out, id))) {
           throw new Error("Esas fechas chocan con otra reserva pagada de la misma propiedad.");
         }
-        return Response.json(await markPaid(id, cleanText(body.amount, 60), cleanText(body.guest_note, 1500)));
+        return Response.json(await markPaid(id, cleanText(body.amount, 60), cleanText(body.total, 60), cleanText(body.guest_note, 1500)));
       }
       case "recordatorio":
         if (current.status !== "pagada") throw new Error("Solo se envía a reservas pagadas.");

@@ -63,6 +63,7 @@ export async function POST(request: Request) {
       status: "pendiente",
       source: "web",
       amount: "",
+      total: "",
       guest_note: "",
       paid_at: null,
       reminder_sent_at: null,
