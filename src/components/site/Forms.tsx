@@ -55,10 +55,13 @@ export function ContactForm({
   propertyCode,
   placeholder = "¿En qué te podemos ayudar?",
   submitLabel = "Enviar mensaje",
+  centered = false,
 }: {
   propertyCode?: string;
   placeholder?: string;
   submitLabel?: string;
+  /** Centra el botón y la nota (para formularios en secciones centradas). */
+  centered?: boolean;
 }) {
   const { state, error, onSubmit } = useForm();
   if (state === "sent") {
@@ -96,14 +99,16 @@ export function ContactForm({
         <Label>Mensaje</Label>
         <textarea name="message" rows={3} placeholder={placeholder} className={`${field} resize-none`} />
       </label>
-      {error && <p className="text-sm text-[#b4423a]">{error}</p>}
-      <button
-        disabled={state === "sending"}
-        className="eyebrow inline-flex h-12 items-center border border-current px-7 transition hover:bg-current/10 disabled:opacity-50"
-      >
-        {state === "sending" ? "Enviando…" : submitLabel}
-      </button>
-      <p className="text-xs opacity-60">Déjanos al menos un teléfono o un correo para responderte.</p>
+      <div className={centered ? "space-y-5 pt-2 text-center" : "space-y-5"}>
+        {error && <p className="text-sm text-[#b4423a]">{error}</p>}
+        <button
+          disabled={state === "sending"}
+          className="eyebrow inline-flex h-12 items-center border border-current px-7 transition hover:bg-current/10 disabled:opacity-50"
+        >
+          {state === "sending" ? "Enviando…" : submitLabel}
+        </button>
+        <p className="text-xs opacity-60">Déjanos al menos un teléfono o un correo para responderte.</p>
+      </div>
     </form>
   );
 }

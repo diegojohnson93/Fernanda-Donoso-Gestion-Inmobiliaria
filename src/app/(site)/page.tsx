@@ -5,8 +5,7 @@ import { ContactForm } from "@/components/site/Forms";
 import { SplitReveal, Typewriter } from "@/components/site/Motion";
 import { PropertyBrowser } from "@/components/site/PropertyBrowser";
 import { Reveal } from "@/components/site/Reveal";
-import { ScaleImage } from "@/components/site/ScaleImage";
-import { PhotoHero, PhotoToneLayers } from "@/components/site/PhotoHero";
+import { PhotoHero } from "@/components/site/PhotoHero";
 import { ScrollText } from "@/components/site/ScrollText";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
@@ -59,9 +58,6 @@ export default async function Home() {
           <ModalityCards items={categories} total={properties.length} />
         </div>
       </section>
-
-      {/* Foto que crece */}
-      <ScaleImage src="/images/renaca.webp" alt="Reñaca, Viña del Mar" />
 
       {/* Declaración */}
       <section className="bg-white px-5 pb-10 pt-28 md:px-12 md:pt-40">
@@ -146,16 +142,16 @@ export default async function Home() {
       </section>
 
       {/* Propietarios: sección destacada, foto a todo el ancho */}
-      <section className="relative overflow-hidden bg-charcoal px-5 py-28 text-white md:px-12 md:py-40">
+      <section className="relative overflow-hidden bg-[#3a322b] px-5 py-28 text-white md:px-12 md:py-40">
+        {/* Foto casi imperceptible: solo textura, en tonos beige */}
         <img
-          src="/images/anual.webp"
+          src="/images/propietarios.webp"
           alt=""
           aria-hidden
-          className="photo-tone absolute inset-0 h-full w-full object-cover"
-          style={{ objectPosition: "52% 50%" }}
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.12] grayscale mix-blend-luminosity"
+          style={{ objectPosition: "60% 50%" }}
         />
-        <PhotoToneLayers />
-        <div aria-hidden className="absolute inset-0 bg-[#2d2620]/45" />
+        <div aria-hidden className="absolute inset-0 bg-[#a58b6c] opacity-[0.12] mix-blend-color" />
         <div className="relative mx-auto max-w-[1240px]">
           <SplitReveal as="h2" type="chars" className="text-center font-serif text-[56px] font-light leading-[0.95] md:text-[112px]">
             {SITE.owners.title}
@@ -215,6 +211,7 @@ export default async function Home() {
           <ContactForm
             placeholder="Cuéntanos si quieres comprar, arrendar o invertir, y para cuándo."
             submitLabel="Quiero mi asesoría gratuita"
+            centered
           />
           <p className="mt-12 text-center text-sm text-stone">
             ¿Prefieres WhatsApp?{" "}
