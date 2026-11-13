@@ -13,7 +13,7 @@ import { SITE, whatsappLink } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Nosotros",
   description:
-    "Fernanda Donoso, Ingeniera Civil Industrial PUCV, asesora inmobiliaria en Viña del Mar, Reñaca y Concón. Primera asesoría gratuita.",
+    "Fernanda Donoso, Ingeniera Civil Industrial PUCV, asesora inmobiliaria en Viña del Mar, Valparaíso, Reñaca y Concón. Primera asesoría gratuita.",
 };
 
 export default async function AboutPage() {

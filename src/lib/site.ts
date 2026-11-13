@@ -12,9 +12,9 @@ export const SITE = {
   whatsappDisplay: "+56 9 9331 6129",
   email: "",
   instagram: "",
-  zone: "Viña del Mar, Reñaca y Concón",
+  zone: "Viña del Mar, Valparaíso, Reñaca y Concón",
   description:
-    "Asesoría y gestión inmobiliaria en Viña del Mar, Reñaca y Concón. Primera asesoría gratuita para comprar, arrendar o invertir: Airbnb, marzo a diciembre, año corrido e inversión.",
+    "Asesoría y gestión inmobiliaria en Viña del Mar, Valparaíso, Reñaca y Concón. Primera asesoría gratuita para comprar, arrendar o invertir: Airbnb, marzo a diciembre, año corrido e inversión.",
   advisoryWhatsapp: "Hola Fernanda, quiero agendar una asesoría gratuita",
 
   hero: {
@@ -68,7 +68,7 @@ export const SITE = {
   aboutPage: {
     marquee: "Nosotros",
     statement:
-      "Fernanda Donoso Asesoría & Gestión Inmobiliaria acompaña a quienes buscan comprar, arrendar o invertir en Viña del Mar, Reñaca y Concón, con una mirada financiera, números claros y atención preferencial en cada paso.",
+      "Fernanda Donoso Asesoría & Gestión Inmobiliaria acompaña a quienes buscan comprar, arrendar o invertir en Viña del Mar, Valparaíso, Reñaca y Concón, con una mirada financiera, números claros y atención preferencial en cada paso.",
     quote: "Una buena propiedad no es un gasto: con los números claros, es una decisión que trabaja para ti.",
     closing: "Fernanda Donoso",
   },
@@ -77,7 +77,7 @@ export const SITE = {
     eyebrow: "Quién te asesora",
     title: "Hola, soy Fernanda",
     paragraphs: [
-      "Soy Ingeniera Civil Industrial de la Pontificia Universidad Católica de Valparaíso y llevo más de tres años en el rubro inmobiliario, asesorando a familias, estudiantes, viajeros e inversionistas en Viña del Mar, Reñaca y Concón.",
+      "Soy Ingeniera Civil Industrial de la Pontificia Universidad Católica de Valparaíso y llevo más de tres años en el rubro inmobiliario, asesorando a familias, estudiantes, viajeros e inversionistas en Viña del Mar, Valparaíso, Reñaca y Concón.",
       "Creo en la inversión inmobiliaria y la practico: mi portafolio personal incluye varias propiedades propias. Por eso te asesoro como lo haría para mí, con números claros y atención preferencial.",
     ],
     stats: [

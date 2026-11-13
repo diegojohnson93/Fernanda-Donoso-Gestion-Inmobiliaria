@@ -7,7 +7,7 @@ import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Propietarios",
-  description: "Arrienda o vende tu propiedad con asesoría personalizada en Viña del Mar, Reñaca y Concón.",
+  description: "Arrienda o vende tu propiedad con asesoría personalizada en Viña del Mar, Valparaíso, Reñaca y Concón.",
 };
 
 const STEPS = [
