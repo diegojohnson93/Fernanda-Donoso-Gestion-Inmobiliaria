@@ -40,11 +40,13 @@ export function ExpandHero({
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     gsap.registerPlugin(ScrollTrigger);
 
-    // Posición del cuadrado relativa a la sección (sin transformaciones del pin).
+    // Posición del cuadrado relativa a la sección, sin escalas: si la página
+    // llega achicada (panel de Propiedades), se corrige con el factor de escala.
     const rect = () => {
       const a = sq.getBoundingClientRect();
       const b = s.getBoundingClientRect();
-      return { left: a.left - b.left, top: a.top - b.top, width: a.width, height: a.height };
+      const k = b.width / (s.offsetWidth || b.width) || 1;
+      return { left: (a.left - b.left) / k, top: (a.top - b.top) / k, width: a.width / k, height: a.height / k };
     };
 
     const ctx = gsap.context(() => {
@@ -59,6 +61,11 @@ export function ExpandHero({
           scrub: 0.6,
           pin: true,
           invalidateOnRefresh: true,
+          // Tras recalcular, dibuja la foto en su lugar sin esperar el scroll.
+          onRefresh: (self) => {
+            self.animation?.progress(self.progress);
+            if (self.progress === 0) gsap.set(ph, rect());
+          },
         },
       });
       tl.fromTo(ph, { left: () => rect().left, top: () => rect().top, width: () => rect().width, height: () => rect().height },
@@ -69,8 +76,13 @@ export function ExpandHero({
     // Las tipografías cambian el alto del texto y mueven el cuadrado: recalcular.
     let alive = true;
     document.fonts?.ready.then(() => alive && ScrollTrigger.refresh());
+    // Si la página viene achicada o se mueve al entrar, recalcular al terminar.
+    const page = document.getElementById("page");
+    const onEnd = (e: TransitionEvent) => e.target === page && ScrollTrigger.refresh();
+    page?.addEventListener("transitionend", onEnd);
     return () => {
       alive = false;
+      page?.removeEventListener("transitionend", onEnd);
       ctx.revert();
     };
   }, []);
