@@ -31,6 +31,7 @@ export default async function CategoryPage({ params }: PageProps<"/propiedades/[
         text={c.title}
         image={c.image}
         imageAlt={c.title}
+        imagePosition={c.imagePosition}
         bg={c.bg}
         header={<SiteHeader tone="light" />}
       >

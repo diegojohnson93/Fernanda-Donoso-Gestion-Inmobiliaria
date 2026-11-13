@@ -124,6 +124,8 @@ export interface Category {
   hex: string;
   /** Foto de la portada, que crece con el scroll. */
   image: string;
+  /** Encuadre de la foto (object-position). */
+  imagePosition?: string;
 }
 
 export const CATEGORIES: Category[] = [
@@ -136,7 +138,8 @@ export const CATEGORIES: Category[] = [
     bg: "bg-cat-airbnb",
     fg: "text-cream",
     hex: "#8b9784",
-    image: "/images/renaca.webp",
+    image: "/images/airbnb.webp",
+    imagePosition: "60% 58%",
   },
   {
     modality: "temporada",
@@ -147,7 +150,8 @@ export const CATEGORIES: Category[] = [
     bg: "bg-cat-temporada",
     fg: "text-cream",
     hex: "#a8887f",
-    image: "/images/vina-del-mar.webp",
+    image: "/images/temporada.webp",
+    imagePosition: "60% 60%",
   },
   {
     modality: "anual",
@@ -158,7 +162,8 @@ export const CATEGORIES: Category[] = [
     bg: "bg-cat-anual",
     fg: "text-cream",
     hex: "#6c7470",
-    image: "/images/vina-del-mar.webp",
+    image: "/images/anual.webp",
+    imagePosition: "52% 55%",
   },
   {
     modality: "venta",
@@ -169,7 +174,8 @@ export const CATEGORIES: Category[] = [
     bg: "bg-cat-venta",
     fg: "text-cream",
     hex: "#2d2a27",
-    image: "/images/renaca.webp",
+    image: "/images/comprar.webp",
+    imagePosition: "61% 40%",
   },
 ];
 
