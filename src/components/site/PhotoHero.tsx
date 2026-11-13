@@ -57,11 +57,10 @@ export function PhotoHero({
         ref={img}
         src={image}
         alt={imageAlt}
-        className="absolute inset-0 h-full w-full origin-center object-cover"
+        className="photo-tone absolute inset-0 h-full w-full origin-center object-cover"
         style={{ objectPosition: imagePosition }}
       />
-      {/* Degradados para que el texto se lea sobre cualquier foto */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/5 to-black/55" />
+      <PhotoToneLayers />
       <div className="relative z-10">{header}</div>
       <div ref={title} className="relative flex flex-1 items-center">
         <div className="w-full overflow-hidden">
@@ -81,5 +80,22 @@ export function PhotoHero({
         {children}
       </div>
     </section>
+  );
+}
+
+/**
+ * Capas que unifican las fotos en tonos beige y oscurecen lo justo para que el
+ * texto mande sobre la imagen. Se usa en todas las portadas.
+ */
+export function PhotoToneLayers() {
+  return (
+    <>
+      {/* Tinte beige: lleva todas las fotos a la misma familia de color */}
+      <div aria-hidden className="absolute inset-0 bg-[#a58b6c] opacity-30 mix-blend-color" />
+      {/* Velo cálido oscuro para dar contraste al texto blanco */}
+      <div aria-hidden className="absolute inset-0 bg-[#2d2620] opacity-30" />
+      {/* Degradados arriba (menú) y abajo (bajada) */}
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#2d2620]/40 via-transparent to-[#2d2620]/60" />
+    </>
   );
 }

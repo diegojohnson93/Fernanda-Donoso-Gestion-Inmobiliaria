@@ -4,6 +4,7 @@ import { ImageReveal } from "@/components/site/ImageReveal";
 import { Label } from "@/components/site/Label";
 import { MarqueeText } from "@/components/site/Marquee";
 import { CountUp, SplitReveal } from "@/components/site/Motion";
+import { PhotoToneLayers } from "@/components/site/PhotoHero";
 import { Reveal } from "@/components/site/Reveal";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
@@ -22,8 +23,8 @@ export default function AboutPage() {
     <>
       {/* Portada con foto a todo el ancho y texto gigante en blanco */}
       <section className="relative flex h-[100svh] min-h-[560px] flex-col overflow-hidden bg-taupe text-white">
-        <img src={heroPhoto} alt="Reñaca, Viña del Mar" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/5 to-black/25" />
+        <img src={heroPhoto} alt="Reñaca, Viña del Mar" className="photo-tone absolute inset-0 h-full w-full object-cover" />
+        <PhotoToneLayers />
         <div className="relative">
           <SiteHeader tone="light" />
         </div>

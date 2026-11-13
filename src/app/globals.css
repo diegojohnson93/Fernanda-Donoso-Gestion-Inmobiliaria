@@ -129,3 +129,6 @@ html.js [data-split]:not([data-ready]) {
 /* Evita palabras sueltas en la última línea */
 h1, h2, h3, blockquote, .font-serif { text-wrap: balance; }
 p { text-wrap: pretty; }
+
+/* Tratamiento común de las fotos de portada: menos saturación, más cálidas */
+.photo-tone { filter: saturate(0.72) sepia(0.18) contrast(0.96); }
