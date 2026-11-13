@@ -1,61 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-
-/**
- * Texto gigante que se desliza sin fin, con una foto fija al centro
- * (el efecto de portada de la referencia).
- */
-export function MarqueeHero({
-  text,
-  image,
-  imageAlt = "",
-  tone = "dark",
-  fallbackBg = "bg-beige",
-  imagePosition = "50% 50%",
-}: {
-  text: string;
-  image?: string | null;
-  imageAlt?: string;
-  tone?: "dark" | "light";
-  fallbackBg?: string;
-  imagePosition?: string;
-}) {
-  const item = (
-    <span className="flex shrink-0 items-center whitespace-nowrap">
-      <span className="px-[0.18em]">{text}</span>
-      <span className="px-[0.18em] text-[0.35em] opacity-60" aria-hidden>
-        ✦
-      </span>
-    </span>
-  );
-  return (
-    <div className="relative flex h-[46vh] min-h-[260px] items-center overflow-hidden md:h-[52vh]">
-      <div
-        className={`marquee-track flex w-max font-serif text-[23vw] font-light leading-none tracking-[-0.02em] md:text-[15vw] ${
-          tone === "light" ? "text-cream" : "text-charcoal"
-        }`}
-        aria-hidden
-      >
-        {item}
-        {item}
-        {item}
-        {item}
-      </div>
-      <span className="sr-only">{text}</span>
-      <div
-        className={`absolute left-1/2 top-1/2 aspect-square w-[42vw] max-w-[260px] -translate-x-1/2 -translate-y-1/2 overflow-hidden md:w-[17vw] ${fallbackBg}`}
-      >
-        {image ? (
-          <img src={image} alt={imageAlt} className="h-full w-full object-cover" style={{ objectPosition: imagePosition }} />
-        ) : (
-          <div className="grid h-full w-full place-items-center">
-            <span aria-hidden className="font-serif text-6xl italic text-cream/80">FD</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 /** Solo el texto gigante que se desliza (sin foto al centro). */
 export function MarqueeText({
   text,
@@ -70,9 +12,7 @@ export function MarqueeText({
     <span className="flex shrink-0 items-center whitespace-nowrap">
       <span className="px-[0.2em]">{text}</span>
       {separator && (
-        <span className="px-[0.2em] text-[0.35em] opacity-60" aria-hidden>
-          ✦
-        </span>
+        <MarqueeDot />
       )}
     </span>
   );
@@ -86,5 +26,12 @@ export function MarqueeText({
       </div>
       <span className="sr-only">{text}</span>
     </div>
+  );
+}
+
+/** Separador minimalista entre repeticiones del texto: un punto pequeño. */
+export function MarqueeDot() {
+  return (
+    <span aria-hidden className="mx-[0.3em] inline-block h-[0.09em] w-[0.09em] shrink-0 translate-y-[0.06em] rounded-full bg-current opacity-80" />
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BuyIntentPrompt } from "@/components/site/BuyIntent";
-import { ExpandHero } from "@/components/site/ExpandHero";
+import { PhotoHero } from "@/components/site/PhotoHero";
 import { PropertyCard } from "@/components/site/PropertyCard";
 import { Reveal } from "@/components/site/Reveal";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -27,19 +27,18 @@ export default async function CategoryPage({ params }: PageProps<"/propiedades/[
 
   return (
     <>
-      <ExpandHero
+      <PhotoHero
         text={c.title}
         image={c.image}
         imageAlt={c.title}
         imagePosition={c.imagePosition}
-        bg={c.bg}
         header={<SiteHeader tone="light" />}
       >
         <p className="mx-auto max-w-lg text-[15px] font-medium leading-relaxed md:text-[17px]">{c.lead}</p>
-        <p className="eyebrow mx-auto mt-5 inline-block border border-cream/70 px-3 py-1.5 !text-[9.5px]">
+        <p className="eyebrow mx-auto mt-5 inline-block border border-white/80 px-3 py-1.5 !text-[9.5px]">
           {list.length} {list.length === 1 ? "propiedad disponible" : "propiedades disponibles"}
         </p>
-      </ExpandHero>
+      </PhotoHero>
 
       <section className="px-5 py-24 md:px-12 md:py-32">
         <div className="mx-auto max-w-[1340px]">

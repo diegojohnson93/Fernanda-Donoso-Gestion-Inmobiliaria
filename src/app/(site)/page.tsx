@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { ModalityCards } from "@/components/site/ModalityCards";
 import { ContactForm } from "@/components/site/Forms";
-import { MarqueeHero } from "@/components/site/Marquee";
 import { CountUp, SplitReveal, Typewriter } from "@/components/site/Motion";
 import { PropertyBrowser } from "@/components/site/PropertyBrowser";
 import { Reveal } from "@/components/site/Reveal";
 import { ScaleImage } from "@/components/site/ScaleImage";
+import { PhotoHero } from "@/components/site/PhotoHero";
 import { ScrollText } from "@/components/site/ScrollText";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
@@ -25,27 +25,26 @@ export default async function Home() {
 
   return (
     <>
-      {/* Portada */}
-      <section className="relative flex min-h-[100svh] flex-col bg-white">
-        <SiteHeader />
-        <div className="flex flex-1 flex-col justify-center">
-          <MarqueeHero text={SITE.hero.marquee} image="/images/fernanda.webp" imageAlt="Fernanda Donoso" imagePosition="50% 22%" />
-          <div className="px-5 pb-24 text-center md:pb-14">
-            <p className="mx-auto max-w-2xl text-[15px] font-medium leading-relaxed md:text-[17px] md:[&_span]:whitespace-pre">
-              <Typewriter text={SITE.hero.lead} on="load" startDelay={1700} speed={26} />
-            </p>
-            <a
-              href={whatsappLink(SITE.advisoryWhatsapp)}
-              target="_blank"
-              rel="noreferrer"
-              className="eyebrow mx-auto mt-5 inline-block border border-charcoal/70 px-3 py-1.5 !text-[9.5px] transition hover:bg-charcoal hover:text-white"
-            >
-              {SITE.hero.badge} →
-            </a>
-          </div>
-        </div>
-        <p className="absolute bottom-10 left-12 hidden text-xs text-stone md:block">(Scroll)</p>
-      </section>
+      {/* Portada: foto completa con el título deslizándose encima */}
+      <PhotoHero
+        text={SITE.hero.marquee}
+        image="/images/vina-del-mar.webp"
+        imageAlt="Viña del Mar"
+        imagePosition="50% 45%"
+        header={<SiteHeader tone="light" />}
+      >
+        <p className="mx-auto max-w-2xl text-[15px] font-medium leading-relaxed md:text-[17px] md:[&_span]:whitespace-pre">
+          <Typewriter text={SITE.hero.lead} on="load" startDelay={1700} speed={26} />
+        </p>
+        <a
+          href={whatsappLink(SITE.advisoryWhatsapp)}
+          target="_blank"
+          rel="noreferrer"
+          className="eyebrow mx-auto mt-5 inline-block border border-white/80 px-3 py-1.5 !text-[9.5px] transition hover:bg-white hover:text-charcoal"
+        >
+          {SITE.hero.badge} →
+        </a>
+      </PhotoHero>
 
       {/* Modalidades: las cuatro tarjetas */}
       <section className="bg-white px-5 pb-28 pt-16 md:px-12 md:pb-36 md:pt-24">
@@ -66,7 +65,7 @@ export default async function Home() {
       </section>
 
       {/* Foto que crece */}
-      <ScaleImage src="/images/vina-del-mar.webp" alt="Viña del Mar, estero Marga Marga" />
+      <ScaleImage src="/images/renaca.webp" alt="Reñaca, Viña del Mar" />
 
       {/* Declaración */}
       <section className="bg-white px-5 pb-10 pt-28 md:px-12 md:pt-40">
