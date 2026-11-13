@@ -1,4 +1,5 @@
 import { airbnbBusyNights, type Availability } from "./airbnb-calendar";
+import { paidNights } from "./reservations";
 import { FICHA, MODALITIES, PRIVATE_DETAIL_KEYS, priceLines, surfaceText, type Details, type Modality } from "./ficha";
 import { getStore } from "./store";
 import type { Photo, Property } from "./types";
@@ -67,8 +68,15 @@ export async function getAirbnbAvailability(code: string): Promise<Availability 
   const all = await getStore().listProperties();
   const p = all.find((x) => x.active && x.published && x.code.toLowerCase() === code.toLowerCase());
   const url = p?.details?.ical_airbnb;
-  if (!p || !p.modalities?.includes("airbnb") || typeof url !== "string" || !url.trim()) return null;
-  return airbnbBusyNights(url.trim());
+  if (!p || !p.modalities?.includes("airbnb")) return null;
+  // Las reservas pagadas directo también bloquean noches, aunque aún no estén en Airbnb.
+  const paid = await paidNights(p.id).catch(() => [] as string[]);
+  const fromAirbnb = typeof url === "string" && url.trim() ? await airbnbBusyNights(url.trim()) : null;
+  if (!fromAirbnb && !paid.length) return null;
+  return {
+    busy: [...new Set([...(fromAirbnb?.busy ?? []), ...paid])].sort(),
+    fetchedAt: fromAirbnb?.fetchedAt ?? new Date().toISOString(),
+  };
 }
 
 /* ------------------------------------------------------------------------ */

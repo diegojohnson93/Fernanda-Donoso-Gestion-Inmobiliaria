@@ -112,6 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const nav = [
     { href: "/admin", label: "Bandeja" },
     { href: "/admin/propiedades", label: "Propiedades" },
+    { href: "/admin/reservas", label: "Reservas" },
   ];
 
   return (

@@ -52,6 +52,7 @@ export function AvailabilityCalendar({
   code,
   title,
   minNights,
+  requestEnabled = false,
 }: {
   busy: string[];
   /** true si las fechas ocupadas vienen del calendario de Airbnb */
@@ -59,6 +60,8 @@ export function AvailabilityCalendar({
   code: string;
   title: string;
   minNights?: string;
+  /** Muestra "Solicitar por correo" (requiere los correos configurados). */
+  requestEnabled?: boolean;
 }) {
   const busySet = useMemo(() => new Set(busy), [busy]);
   // "Hoy" depende de la zona horaria del visitante: se calcula solo en el navegador.
@@ -68,6 +71,43 @@ export function AvailabilityCalendar({
   const [checkOut, setCheckOut] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [requesting, setRequesting] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  async function submitRequest(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!checkIn || !checkOut) return;
+    const fd = new FormData(e.currentTarget);
+    setSending(true);
+    setFormError(null);
+    try {
+      const res = await fetch("/api/public/reservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_code: code,
+          check_in: checkIn,
+          check_out: checkOut,
+          name: fd.get("name"),
+          phone: fd.get("phone"),
+          email: fd.get("email"),
+          guests: fd.get("guests"),
+          message: fd.get("message"),
+          website: fd.get("website"),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.error ?? "No pudimos enviar la solicitud.");
+      setSent(true);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSending(false);
+    }
+  }
 
   /** ¿Están libres todas las noches entre a (incluida) y b (excluida)? */
   const rangeFree = (a: string, b: string) => {
@@ -77,6 +117,7 @@ export function AvailabilityCalendar({
 
   function pick(day: string) {
     setNotice(null);
+    setSent(false);
     if (!checkIn || checkOut || day <= checkIn) {
       if (busySet.has(day))
         return setNotice(
@@ -278,6 +319,15 @@ export function AvailabilityCalendar({
                 ? "Reservar por WhatsApp"
                 : "Consultar por WhatsApp"}
             </a>
+            {requestEnabled && checkIn && checkOut && !sent && (
+              <button
+                type="button"
+                onClick={() => setRequesting((v) => !v)}
+                className="eyebrow inline-flex h-12 items-center border border-charcoal px-6 transition hover:bg-cream"
+              >
+                Solicitar por correo
+              </button>
+            )}
             {(checkIn || checkOut) && (
               <button
                 type="button"
@@ -292,6 +342,108 @@ export function AvailabilityCalendar({
               </button>
             )}
           </div>
+          {requestEnabled && checkIn && checkOut && sent && (
+            <div className="mt-6 bg-cream p-5 text-sm leading-relaxed">
+              <p className="font-serif text-2xl">¡Solicitud enviada!</p>
+              <p className="mt-2 text-graphite">
+                Te enviamos un correo con los pasos para confirmar tu reserva.
+                Fernanda te escribirá por WhatsApp a la brevedad.
+              </p>
+            </div>
+          )}
+          {requestEnabled && checkIn && checkOut && requesting && !sent && (
+            <form
+              onSubmit={submitRequest}
+              className="mt-6 grid gap-4 border-t border-charcoal/10 pt-6 sm:grid-cols-2"
+            >
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                className="hidden"
+                aria-hidden
+              />
+              {[
+                {
+                  name: "name",
+                  label: "Nombre",
+                  type: "text",
+                  auto: "name",
+                  span: true,
+                },
+                {
+                  name: "phone",
+                  label: "Teléfono",
+                  type: "tel",
+                  auto: "tel",
+                  span: false,
+                },
+                {
+                  name: "email",
+                  label: "Correo",
+                  type: "email",
+                  auto: "email",
+                  span: false,
+                },
+              ].map((f) => (
+                <label
+                  key={f.name}
+                  className={`block ${f.span ? "sm:col-span-2" : ""}`}
+                >
+                  <span className="eyebrow !text-[9.5px] text-stone">
+                    {f.label}
+                  </span>
+                  <input
+                    name={f.name}
+                    type={f.type}
+                    required
+                    autoComplete={f.auto}
+                    className="mt-1 w-full border-b border-charcoal/25 bg-transparent py-2 text-[15px] outline-none focus:border-charcoal"
+                  />
+                </label>
+              ))}
+              <label className="block">
+                <span className="eyebrow !text-[9.5px] text-stone">
+                  Huéspedes
+                </span>
+                <input
+                  name="guests"
+                  type="number"
+                  min={1}
+                  max={50}
+                  className="mt-1 w-full border-b border-charcoal/25 bg-transparent py-2 text-[15px] outline-none focus:border-charcoal"
+                />
+              </label>
+              <label className="block">
+                <span className="eyebrow !text-[9.5px] text-stone">
+                  Mensaje (opcional)
+                </span>
+                <input
+                  name="message"
+                  className="mt-1 w-full border-b border-charcoal/25 bg-transparent py-2 text-[15px] outline-none focus:border-charcoal"
+                />
+              </label>
+              {formError && (
+                <p className="text-sm text-[#b4423a] sm:col-span-2">
+                  {formError}
+                </p>
+              )}
+              <div className="sm:col-span-2">
+                <button
+                  disabled={sending}
+                  className="eyebrow inline-flex h-12 items-center bg-charcoal px-7 text-cream transition hover:bg-graphite disabled:opacity-50"
+                >
+                  {sending ? "Enviando…" : "Enviar solicitud"}
+                </button>
+                <p className="mt-3 text-xs text-stone">
+                  Te llegará un correo con los datos de pago. La reserva queda
+                  confirmada al recibir el pago.
+                </p>
+              </div>
+            </form>
+          )}
+
           <p className="mt-4 text-xs leading-relaxed text-stone">
             {synced
               ? "Disponibilidad sincronizada con nuestro calendario; puede tardar unas horas en actualizarse. Confirmamos cada reserva por WhatsApp."

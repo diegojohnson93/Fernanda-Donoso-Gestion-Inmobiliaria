@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { authEnabled, SESSION_COOKIE, sessionToken } from "@/lib/auth";
 
 /** APIs que el público o Meta pueden llamar sin contraseña. */
-const PUBLIC_API = ["/api/login", "/api/webhooks/", "/api/public/"];
+// /api/cron/ se protege con CRON_SECRET dentro de la ruta.
+const PUBLIC_API = ["/api/login", "/api/webhooks/", "/api/public/", "/api/cron/"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

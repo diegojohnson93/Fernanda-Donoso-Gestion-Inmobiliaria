@@ -5,6 +5,8 @@ import type {
   Message,
   Property,
   PropertyInput,
+  Reservation,
+  ReservationInput,
 } from "../types";
 
 export interface Store {
@@ -25,4 +27,9 @@ export interface Store {
   updateConversation(id: string, patch: Partial<Conversation>): Promise<Conversation>;
 
   addMessage(input: Omit<Message, "id">): Promise<Message>;
+
+  listReservations(): Promise<Reservation[]>;
+  getReservation(id: string): Promise<Reservation | null>;
+  createReservation(input: ReservationInput): Promise<Reservation>;
+  updateReservation(id: string, patch: Partial<ReservationInput>): Promise<Reservation>;
 }

@@ -176,3 +176,10 @@ supabase/schema.sql          Tablas para Supabase
 - Varias usuarias con login propio (Supabase Auth).
 - Recordatorios de visitas y seguimiento de leads.
 - Sitio web público de propiedades que use estas mismas fichas.
+
+## Reservas directas y correos
+
+- **Calendario**: en la ficha de cada propiedad Airbnb, pegar el enlace `.ics` del anuncio (Airbnb → Calendario → Disponibilidad → Conectar calendarios → Exportar). La web muestra las noches ocupadas (se actualiza cada 30 min) y las reservas pagadas en el CRM.
+- **CRM → Reservas**: solicitudes que llegan desde la web y reservas acordadas por WhatsApp. "Marcar como pagada" envía la confirmación al huésped con copia a Fernanda.
+- **Recordatorio**: una tarea diaria (`vercel.json`, 10:00 hora de Chile aprox.) envía la dirección y el check-in 2 días antes de la llegada.
+- **Puesta en marcha**: ejecutar `supabase/migrations/005_reservas.sql` en Supabase y cargar en Vercel `RESEND_API_KEY`, `MAIL_FROM`, `NOTIFY_EMAIL`, `TRANSFER_INFO`, `SITE_URL` y `CRON_SECRET` (ver `.env.example`).

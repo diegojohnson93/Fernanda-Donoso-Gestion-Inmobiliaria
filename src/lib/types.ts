@@ -118,3 +118,38 @@ export interface IncomingMessage {
   referral_text?: string | null;
   timestamp?: string;
 }
+
+/* ------------------------------------------------------------------------ */
+/* Reservas (estadías cortas tipo Airbnb, cobradas directo)                  */
+/* ------------------------------------------------------------------------ */
+
+export type ReservationStatus = "pendiente" | "pagada" | "cancelada";
+export type ReservationSource = "web" | "manual";
+
+export interface Reservation {
+  id: string;
+  property_id: string | null;
+  property_code: string;
+  property_title: string;
+  /** Día de llegada, AAAA-MM-DD */
+  check_in: string;
+  /** Día de salida, AAAA-MM-DD */
+  check_out: string;
+  guests: number | null;
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+  status: ReservationStatus;
+  source: ReservationSource;
+  /** Monto pagado, como lo escribe Fernanda ("$180.000") */
+  amount: string;
+  /** Nota para el huésped que va en el correo de confirmación */
+  guest_note: string;
+  paid_at: string | null;
+  reminder_sent_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ReservationInput = Omit<Reservation, "id" | "created_at" | "updated_at">;

@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Conversation, ConversationWithMessages, Message, Property } from "../types";
+import type { Conversation, ConversationWithMessages, Message, Property, Reservation } from "../types";
 import type { Store } from "./types";
 
 let client: SupabaseClient | null = null;
@@ -97,5 +97,28 @@ export const supabaseStore: Store = {
     return check(
       await sb().from("messages").insert(input).select("*").single(),
     ) as Message;
+  },
+
+  async listReservations() {
+    return check(
+      await sb().from("reservations").select("*").order("check_in").limit(1000),
+    ) as Reservation[];
+  },
+  async getReservation(id) {
+    return check(
+      await sb().from("reservations").select("*").eq("id", id).maybeSingle(),
+    ) as Reservation | null;
+  },
+  async createReservation(input) {
+    return check(
+      await sb().from("reservations").insert(input).select("*").single(),
+    ) as Reservation;
+  },
+  async updateReservation(id, patch) {
+    const clean = { ...patch, updated_at: new Date().toISOString() } as Record<string, unknown>;
+    delete clean.id;
+    return check(
+      await sb().from("reservations").update(clean).eq("id", id).select("*").single(),
+    ) as Reservation;
   },
 };
