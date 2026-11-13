@@ -88,11 +88,11 @@ export function ContactForm({
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block">
           <Label>Teléfono</Label>
-          <input name="phone" type="tel" autoComplete="tel" placeholder="+56 9" className={field} />
+          <input name="phone" type="tel" required autoComplete="tel" placeholder="+56 9" className={field} />
         </label>
         <label className="block">
           <Label>Correo</Label>
-          <input name="email" type="email" autoComplete="email" className={field} />
+          <input name="email" type="email" required autoComplete="email" className={field} />
         </label>
       </div>
       <label className="block">
@@ -107,7 +107,7 @@ export function ContactForm({
         >
           {state === "sending" ? "Enviando…" : submitLabel}
         </button>
-        <p className="text-xs opacity-60">Déjanos al menos un teléfono o un correo para responderte.</p>
+        <p className="text-xs opacity-60">Nombre, teléfono y correo son obligatorios. El mensaje es opcional.</p>
       </div>
     </form>
   );
@@ -147,11 +147,11 @@ export function OwnerForm() {
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block">
           <Label>Teléfono</Label>
-          <input name="phone" type="tel" autoComplete="tel" placeholder="+56 9" className={field} />
+          <input name="phone" type="tel" required autoComplete="tel" placeholder="+56 9" className={field} />
         </label>
         <label className="block">
           <Label>Correo</Label>
-          <input name="email" type="email" autoComplete="email" className={field} />
+          <input name="email" type="email" required autoComplete="email" className={field} />
         </label>
       </div>
       <div className="grid gap-5 sm:grid-cols-3">

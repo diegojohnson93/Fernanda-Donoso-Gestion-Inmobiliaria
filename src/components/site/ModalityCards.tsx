@@ -105,7 +105,7 @@ export function ModalityCards({ items, total }: { items: CategoryInfo[]; total: 
                 dim ? "opacity-45 saturate-50" : ""
               } ${isActive ? "md:-translate-y-3" : ""}`}
             >
-              <div className={`relative flex min-h-[240px] flex-1 flex-col justify-between p-4 md:min-h-[380px] md:p-5 ${c.bg}`}>
+              <div className={`relative flex min-h-[192px] flex-1 flex-col justify-between p-4 md:min-h-[304px] md:p-5 ${c.bg}`}>
                 <div className="flex items-start justify-between">
                   <span className="font-serif text-lg italic leading-none opacity-80">FD</span>
                   <span className="text-[11px] opacity-80">0{i + 1}</span>
@@ -121,13 +121,13 @@ export function ModalityCards({ items, total }: { items: CategoryInfo[]; total: 
                   </div>
                   <h3
                     data-mtitle
-                    className="vertical-title relative z-10 ml-auto font-serif text-[32px] font-normal leading-[0.9] drop-shadow-sm md:text-[52px]"
+                    className="vertical-title relative z-10 ml-auto font-serif text-[24px] font-normal leading-[0.9] drop-shadow-sm md:text-[40px]"
                   >
                     {c.title}
                   </h3>
                 </div>
               </div>
-              <div className={`relative h-24 overflow-hidden transition-[height] duration-700 ease-[cubic-bezier(.16,1,.3,1)] md:h-40 md:group-hover:h-56 ${c.bg}`}>
+              <div className={`relative h-[77px] overflow-hidden transition-[height] duration-700 ease-[cubic-bezier(.16,1,.3,1)] md:h-32 md:group-hover:h-44 ${c.bg}`}>
                 {cover ? (
                   <img
                     src={cover}

@@ -48,9 +48,8 @@ export async function POST(request: Request) {
     const code = clean(body.property_code, 20).toUpperCase();
 
     if (!name) return errorResponse(new Error("Cuéntanos tu nombre."), 400);
-    if (!phone && !email) {
-      return errorResponse(new Error("Déjanos un teléfono o un correo para responderte."), 400);
-    }
+    if (!phone) return errorResponse(new Error("Déjanos tu teléfono."), 400);
+    if (!email) return errorResponse(new Error("Déjanos tu correo."), 400);
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return errorResponse(new Error("El correo no parece válido."), 400);
     }
