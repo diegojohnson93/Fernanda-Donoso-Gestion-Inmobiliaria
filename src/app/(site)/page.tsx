@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CategoryCards } from "@/components/site/CategoryCards";
+import { ModalityCards } from "@/components/site/ModalityCards";
 import { ContactForm } from "@/components/site/Forms";
 import { MarqueeHero } from "@/components/site/Marquee";
 import { CountUp, SplitReveal, Typewriter } from "@/components/site/Motion";
@@ -62,9 +62,7 @@ export default async function Home() {
               </SplitReveal>
             </div>
           </div>
-          <Reveal>
-            <CategoryCards items={categories} />
-          </Reveal>
+          <ModalityCards items={categories} total={properties.length} />
         </div>
       </section>
 
@@ -221,9 +219,9 @@ export default async function Home() {
             >
               {SITE.about.paragraphs[0]}
             </SplitReveal>
-            <div className="mt-14 grid grid-cols-2 border-t border-charcoal/12 md:grid-cols-3">
+            <div className="mt-14 flex flex-wrap gap-x-16 gap-y-2 border-t border-charcoal/12 pt-2 md:gap-x-20">
               {SITE.about.stats.map((s, i) => (
-                <Reveal key={s.label} delay={i * 80} className="border-b border-charcoal/12 py-6 pr-4 md:border-b-0">
+                <Reveal key={s.label} delay={i * 80} className="py-5">
                   <CountUp value={s.value} className="block font-serif text-[30px] leading-tight" />
                   <p className="mt-1 text-xs leading-snug text-stone">{s.label}</p>
                 </Reveal>

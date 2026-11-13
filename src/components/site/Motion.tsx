@@ -51,6 +51,11 @@ export function SplitReveal({
         autoSplit: type === "lines",
         onSplit(self) {
           el.dataset.ready = "true";
+          // Holgura para que la máscara no corte acentos ni letras que bajan (¿, g, p).
+          self.masks.forEach((m) => {
+            (m as HTMLElement).style.padding = "0.14em 0.04em 0.18em";
+            (m as HTMLElement).style.margin = "-0.14em -0.04em -0.18em";
+          });
           const targets = type === "chars" ? self.chars : type === "words" ? self.words : self.lines;
           return gsap.from(targets, {
             yPercent: 110,

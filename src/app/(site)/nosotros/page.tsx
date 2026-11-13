@@ -78,9 +78,9 @@ export default async function AboutPage() {
                 {t}
               </SplitReveal>
             ))}
-            <div className="mt-10 grid grid-cols-1 border-t border-charcoal/12 sm:grid-cols-3">
+            <div className="mt-10 flex flex-wrap gap-x-16 gap-y-2 border-t border-charcoal/12 pt-2 md:gap-x-20">
               {SITE.about.stats.map((s, i) => (
-                <Reveal key={s.label} delay={i * 90} className="border-b border-charcoal/12 py-6 pr-4">
+                <Reveal key={s.label} delay={i * 90} className="py-5">
                   <CountUp value={s.value} className="block font-serif text-[30px] leading-tight" />
                   <p className="mt-1 text-xs leading-snug text-stone">{s.label}</p>
                 </Reveal>
