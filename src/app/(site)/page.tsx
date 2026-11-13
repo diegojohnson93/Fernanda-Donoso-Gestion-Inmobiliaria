@@ -5,6 +5,7 @@ import { ContactForm } from "@/components/site/Forms";
 import { SplitReveal, Typewriter } from "@/components/site/Motion";
 import { PropertyBrowser } from "@/components/site/PropertyBrowser";
 import { Reveal } from "@/components/site/Reveal";
+import { Parallax } from "@/components/site/Parallax";
 import { PhotoHero } from "@/components/site/PhotoHero";
 import { ScrollText } from "@/components/site/ScrollText";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -144,13 +145,16 @@ export default async function Home() {
       {/* Propietarios: sección destacada, foto a todo el ancho */}
       <section className="relative overflow-hidden bg-[#3a322b] px-5 py-28 text-white md:px-12 md:py-40">
         {/* Foto casi imperceptible: solo textura, en tonos beige */}
-        <img
-          src="/images/propietarios.webp"
-          alt=""
-          aria-hidden
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.12] grayscale mix-blend-luminosity"
-          style={{ objectPosition: "60% 50%" }}
-        />
+        <Parallax className="absolute inset-0">
+          <img
+            src="/images/propietarios.webp"
+            alt=""
+            aria-hidden
+            data-speed="1"
+            className="absolute inset-x-0 -top-[18%] h-[136%] w-full object-cover opacity-[0.12] grayscale mix-blend-luminosity"
+            style={{ objectPosition: "60% 50%" }}
+          />
+        </Parallax>
         <div aria-hidden className="absolute inset-0 bg-[#a58b6c] opacity-[0.12] mix-blend-color" />
         <div className="relative mx-auto max-w-[1240px]">
           <SplitReveal as="h2" type="chars" className="text-center font-serif text-[56px] font-light leading-[0.95] md:text-[112px]">
