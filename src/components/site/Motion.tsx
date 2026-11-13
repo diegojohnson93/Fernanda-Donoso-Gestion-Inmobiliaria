@@ -147,7 +147,7 @@ export function Typewriter({
       <span aria-hidden className="absolute inset-0 whitespace-pre-line">
         {text.slice(0, count)}
         <span
-          className={`ml-[1px] inline-block w-[2px] translate-y-[0.12em] bg-current align-baseline ${
+          className={`-mr-[3px] ml-[1px] inline-block w-[2px] translate-y-[0.12em] bg-current align-baseline ${
             done ? "animate-[blink_1s_steps(1)_infinite]" : ""
           }`}
           style={{ height: "1em" }}

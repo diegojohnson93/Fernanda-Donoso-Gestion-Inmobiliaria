@@ -31,7 +31,7 @@ export default async function Home() {
         <div className="flex flex-1 flex-col justify-center">
           <MarqueeHero text={SITE.hero.marquee} image="/images/fernanda.webp" imageAlt="Fernanda Donoso" imagePosition="50% 22%" />
           <div className="px-5 pb-24 text-center md:pb-14">
-            <p className="mx-auto max-w-xl text-[15px] font-medium leading-relaxed md:text-[17px]">
+            <p className="mx-auto max-w-2xl text-[15px] font-medium leading-relaxed md:text-[17px] md:[&_span]:whitespace-pre">
               <Typewriter text={SITE.hero.lead} on="load" startDelay={1700} speed={26} />
             </p>
             <a
