@@ -18,8 +18,6 @@ export default async function Home() {
   const properties = await getPublishedProperties();
   const withPhotos = properties.filter((p) => p.photos.length);
   const heroImage = withPhotos.find((p) => p.featured)?.photos[0].url ?? withPhotos[0]?.photos[0].url ?? null;
-  const bigImage =
-    withPhotos.find((p) => p.featured)?.photos[1]?.url ?? withPhotos[1]?.photos[0].url ?? heroImage;
 
   return (
     <>
@@ -65,7 +63,7 @@ export default async function Home() {
       </section>
 
       {/* Foto que crece */}
-      <ScaleImage src={bigImage} />
+      <ScaleImage src="/images/vina-del-mar.webp" alt="Viña del Mar, estero Marga Marga" />
 
       {/* Declaración */}
       <section className="bg-white px-5 pb-10 pt-28 md:px-12 md:pt-40">

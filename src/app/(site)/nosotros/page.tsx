@@ -18,7 +18,8 @@ export const metadata: Metadata = {
 
 export default async function AboutPage() {
   const photos = (await getPublishedProperties()).flatMap((p) => p.photos.map((ph) => ph.url));
-  const [heroPhoto, midPhoto, quotePhoto] = [photos[0] ?? null, photos[1] ?? photos[0] ?? null, photos[2] ?? photos[0] ?? null];
+  const vina = "/images/vina-del-mar.webp";
+  const [heroPhoto, midPhoto, quotePhoto] = [photos[0] ?? vina, vina, photos[2] ?? photos[0] ?? vina];
 
   return (
     <>
