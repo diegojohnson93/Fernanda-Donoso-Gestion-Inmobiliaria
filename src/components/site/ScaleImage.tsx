@@ -45,7 +45,7 @@ export function ScaleImage({ src, alt = "", fallbackBg = "bg-beige" }: { src: st
         style={{ clipPath: "inset(18% 27% 18% 27%)" }}
       >
         {src ? (
-          <img src={src} alt={alt} className="h-full w-full object-cover" />
+          <img src={src} alt={alt} className="photo-tone h-full w-full object-cover" />
         ) : (
           <div
             className="h-full w-full"

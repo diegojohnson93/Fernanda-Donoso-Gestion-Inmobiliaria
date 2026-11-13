@@ -19,7 +19,7 @@ export function PropertyBrowser({ properties }: { properties: PublicProperty[] }
 
   return (
     <div>
-      <div className="-mx-5 mb-12 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:px-0">
+      <div className="-mx-5 mb-12 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:justify-center md:px-0">
         {(["todas", ...CATEGORIES.map((c) => c.modality)] as const).map((m) => {
           const c = CATEGORIES.find((x) => x.modality === m);
           const active = filter === m;

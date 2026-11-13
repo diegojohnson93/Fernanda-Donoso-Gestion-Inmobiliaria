@@ -60,7 +60,7 @@ export function ModalityCards({ items, total }: { items: CategoryInfo[]; total: 
   return (
     <div>
       {/* Pestañas */}
-      <div className="-mx-5 mb-8 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:mb-10 md:flex-wrap md:px-0">
+      <div className="-mx-5 mb-8 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:mb-10 md:flex-wrap md:justify-center md:px-0">
         <Link
           href="#propiedades"
           className="flex shrink-0 items-center gap-2 border border-charcoal bg-charcoal px-4 py-2.5 text-sm text-white transition-colors duration-300 hover:bg-white hover:text-charcoal"

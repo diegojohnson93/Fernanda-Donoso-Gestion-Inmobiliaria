@@ -1,16 +1,15 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { ModalityCards } from "@/components/site/ModalityCards";
 import { ContactForm } from "@/components/site/Forms";
-import { CountUp, SplitReveal, Typewriter } from "@/components/site/Motion";
+import { SplitReveal, Typewriter } from "@/components/site/Motion";
 import { PropertyBrowser } from "@/components/site/PropertyBrowser";
 import { Reveal } from "@/components/site/Reveal";
 import { ScaleImage } from "@/components/site/ScaleImage";
-import { PhotoHero } from "@/components/site/PhotoHero";
+import { PhotoHero, PhotoToneLayers } from "@/components/site/PhotoHero";
 import { ScrollText } from "@/components/site/ScrollText";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { ImageReveal } from "@/components/site/ImageReveal";
-import { Label } from "@/components/site/Label";
 import { getPublishedProperties } from "@/lib/public";
 import { CATEGORIES, SITE, whatsappLink } from "@/lib/site";
 
@@ -49,16 +48,13 @@ export default async function Home() {
       {/* Modalidades: las cuatro tarjetas */}
       <section className="bg-white px-5 pb-28 pt-16 md:px-12 md:pb-36 md:pt-24">
         <div className="mx-auto max-w-[1340px]">
-          <div className="mb-10 grid gap-6 md:mb-14 md:grid-cols-[1fr_2fr] md:items-end">
-            <Label>Modalidades</Label>
-            <div className="flex flex-wrap items-end justify-between gap-6">
-              <SplitReveal as="h2" type="chars" className="font-serif text-[48px] font-light leading-[0.98] md:text-[84px]">
-                ¿Qué estás buscando?
-              </SplitReveal>
-              <SplitReveal as="p" delay={150} className="max-w-xs text-sm leading-relaxed text-stone">
-                Elige una modalidad y te mostramos las propiedades disponibles.
-              </SplitReveal>
-            </div>
+          <div className="mb-10 text-center md:mb-14">
+            <SplitReveal as="h2" type="chars" className="font-serif text-[48px] font-light leading-[0.98] md:text-[84px]">
+              ¿Qué estás buscando?
+            </SplitReveal>
+            <SplitReveal as="p" delay={150} className="mx-auto mt-5 max-w-md text-[15px] leading-relaxed text-graphite">
+              Elige una modalidad y te mostramos las propiedades disponibles.
+            </SplitReveal>
           </div>
           <ModalityCards items={categories} total={properties.length} />
         </div>
@@ -71,24 +67,21 @@ export default async function Home() {
       <section className="bg-white px-5 pb-10 pt-28 md:px-12 md:pt-40">
         <ScrollText
           text={SITE.statement}
-          className="mx-auto max-w-[1180px] text-[28px] font-medium leading-[1.14] tracking-[-0.015em] md:text-[54px]"
+          className="mx-auto max-w-[1180px] text-center text-[28px] font-medium leading-[1.14] tracking-[-0.015em] md:text-[54px]"
         />
       </section>
 
       {/* Propiedades disponibles: lo primero que ve el cliente */}
       <section id="propiedades" className="scroll-mt-10 bg-white px-5 pb-10 pt-28 md:px-12 md:pt-36">
         <div className="mx-auto max-w-[1340px]">
-          <div className="mb-10 grid gap-6 md:mb-14 md:grid-cols-[1fr_2fr] md:items-end">
-            <Label>Propiedades</Label>
-            <div>
-              <SplitReveal as="h2" type="chars" className="font-serif text-[52px] font-light leading-[0.95] md:text-[96px]">
-                Disponibles hoy
-              </SplitReveal>
-              <SplitReveal as="p" delay={200} className="mt-5 max-w-md text-[15px] leading-relaxed text-graphite">
-                Elige una modalidad y revisa las propiedades que tenemos para ti. ¿No sabes cuál te conviene? Te
-                asesoramos gratis.
-              </SplitReveal>
-            </div>
+          <div className="mb-10 text-center md:mb-14">
+            <SplitReveal as="h2" type="chars" className="font-serif text-[52px] font-light leading-[0.95] md:text-[96px]">
+              Disponibles hoy
+            </SplitReveal>
+            <SplitReveal as="p" delay={200} className="mx-auto mt-5 max-w-md text-[15px] leading-relaxed text-graphite">
+              Elige una modalidad y revisa las propiedades que tenemos para ti. ¿No sabes cuál te conviene? Te
+              asesoramos gratis.
+            </SplitReveal>
           </div>
           <PropertyBrowser properties={properties} />
         </div>
@@ -97,16 +90,13 @@ export default async function Home() {
       {/* Lo que recibes */}
       <section className="bg-white px-5 py-28 md:px-12 md:py-36">
         <div className="mx-auto max-w-[1240px]">
-          <div className="grid gap-6 md:grid-cols-[1fr_2fr]">
-            <Label>{SITE.tagline}</Label>
-            <div>
-              <SplitReveal as="h2" type="chars" className="font-serif text-[48px] font-light leading-[0.98] md:text-[84px]">
-                {SITE.intro.title}
-              </SplitReveal>
-              <SplitReveal as="p" delay={150} className="mt-7 max-w-xl text-[15px] leading-relaxed text-graphite">
-                {SITE.intro.text}
-              </SplitReveal>
-            </div>
+          <div className="text-center">
+            <SplitReveal as="h2" type="chars" className="font-serif text-[48px] font-light leading-[0.98] md:text-[84px]">
+              {SITE.intro.title}
+            </SplitReveal>
+            <SplitReveal as="p" delay={150} className="mx-auto mt-7 max-w-xl text-[15px] leading-relaxed text-graphite">
+              {SITE.intro.text}
+            </SplitReveal>
           </div>
           <div className="mt-20 grid border-t border-charcoal/12 sm:grid-cols-2 lg:grid-cols-4">
             {SITE.value.items.map((it, i) => (
@@ -124,70 +114,21 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Asesoría gratuita */}
-      <section id="asesoria" className="scroll-mt-10 bg-white px-5 pb-28 md:px-12 md:pb-40">
-        <div className="mx-auto grid max-w-[1240px] gap-16 border-t border-charcoal/12 pt-28 md:grid-cols-[1fr_1.05fr] md:gap-24 md:pt-36">
-          <div className="md:sticky md:top-24 md:self-start">
-            <Label>{SITE.advisory.eyebrow}</Label>
-            <SplitReveal as="h2" type="lines" className="mt-5 font-serif text-5xl font-light leading-[1.02] md:text-7xl">
-              {SITE.advisory.title}
-            </SplitReveal>
-            <SplitReveal as="p" delay={150} className="mt-7 max-w-md text-[15px] leading-relaxed text-graphite">
-              {SITE.advisory.text}
-            </SplitReveal>
-            <Reveal delay={200} className="mt-7 flex flex-wrap gap-2">
-              {SITE.advisory.factors.map((f) => (
-                <span key={f} className="border border-charcoal/20 px-3 py-1.5 text-xs">
-                  {f}
-                </span>
-              ))}
-            </Reveal>
-            <Reveal delay={260}>
-              <a
-                href={whatsappLink(SITE.advisoryWhatsapp)}
-                target="_blank"
-                rel="noreferrer"
-                className={`${button} mt-10 border-charcoal bg-charcoal text-white hover:bg-white hover:text-charcoal`}
-              >
-                Agenda tu asesoría gratuita
-              </a>
-            </Reveal>
-          </div>
-          <ol className="border-t border-charcoal/12">
-            {SITE.advisory.steps.map((s, i) => (
-              <Reveal
-                as="li"
-                key={s.title}
-                delay={i * 80}
-                className="flex gap-6 border-b border-charcoal/12 py-8 md:gap-10 md:py-10"
-              >
-                <span className="w-10 font-serif text-6xl font-light leading-none text-taupe md:text-7xl">{i + 1}</span>
-                <div className="pt-1">
-                  <h3 className="font-serif text-3xl">{s.title}</h3>
-                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-graphite">{s.text}</p>
-                </div>
-              </Reveal>
-            ))}
-          </ol>
-        </div>
-      </section>
-
       {/* Nuestra mirada + inversión */}
       <section className="bg-charcoal px-5 py-28 text-white md:px-12 md:py-44">
-        <div className="mx-auto max-w-[1100px]">
-          <Label light>{SITE.invest.eyebrow}</Label>
+        <div className="mx-auto max-w-[1100px] text-center">
           <SplitReveal
             as="blockquote"
             type="lines"
-            className="mt-6 font-serif text-[34px] font-light italic leading-[1.12] md:text-[54px]"
+            className="font-serif text-[34px] font-light italic leading-[1.12] md:text-[54px]"
           >
             {`“${SITE.invest.quote}”`}
           </SplitReveal>
-          <div className="mt-14 grid gap-10 border-t border-white/15 pt-10 md:grid-cols-[1fr_auto] md:items-end">
-            <SplitReveal as="p" delay={160} className="max-w-xl text-[15px] leading-relaxed text-white/75">
+          <div className="mx-auto mt-14 max-w-2xl border-t border-white/15 pt-10">
+            <SplitReveal as="p" delay={160} className="mx-auto max-w-xl text-[15px] leading-relaxed text-white/75">
               {SITE.invest.text}
             </SplitReveal>
-            <Reveal delay={240} className="flex flex-wrap gap-3">
+            <Reveal delay={240} className="mt-10 flex flex-wrap justify-center gap-3">
               <Link href="/propiedades/comprar" className={`${button} border-white hover:bg-white hover:text-charcoal`}>
                 Ver propiedades en venta
               </Link>
@@ -204,93 +145,89 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Nosotros (resumen) */}
-      <section className="bg-white px-5 py-28 md:px-12 md:py-40">
-        <div className="mx-auto grid max-w-[1240px] gap-10 md:grid-cols-[1fr_2.2fr] md:gap-16">
-          <div>
-            <Label>Nosotros</Label>
-            <ImageReveal
-              src="/images/fernanda.webp"
-              alt="Fernanda Donoso"
-              position="50% 20%"
-              className="mt-6 aspect-[4/5] w-full max-w-sm"
-            />
-          </div>
-          <div className="md:pt-10">
-            <SplitReveal
-              as="p"
-              type="lines"
-              indent="22%"
-              className="text-[26px] font-medium leading-[1.16] tracking-[-0.015em] md:text-[38px]"
-            >
-              {SITE.about.paragraphs[0]}
-            </SplitReveal>
-            <div className="mt-14 flex flex-wrap gap-x-16 gap-y-2 border-t border-charcoal/12 pt-2 md:gap-x-20">
-              {SITE.about.stats.map((s, i) => (
-                <Reveal key={s.label} delay={i * 80} className="py-5">
-                  <CountUp value={s.value} className="block font-serif text-[30px] leading-tight" />
-                  <p className="mt-1 text-xs leading-snug text-stone">{s.label}</p>
-                </Reveal>
-              ))}
-            </div>
-            <Reveal delay={200}>
-              <Link href="/nosotros" className="eyebrow mt-10 inline-block border-b border-charcoal pb-1">
-                Conoce a Fernanda →
-              </Link>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* Propietarios */}
-      <section className="bg-cream px-5 py-28 md:px-12 md:py-36">
-        <div className="mx-auto flex max-w-[1240px] flex-col items-start justify-between gap-10 md:flex-row md:items-end">
-          <div>
-            <Label>Propietarios</Label>
-            <SplitReveal as="h2" type="chars" className="mt-4 font-serif text-5xl font-light md:text-7xl">
-              {SITE.owners.title}
-            </SplitReveal>
-            <SplitReveal as="p" delay={160} className="mt-6 max-w-lg text-[15px] leading-relaxed text-graphite">
-              {SITE.owners.text}
-            </SplitReveal>
-          </div>
-          <Reveal delay={240}>
-            <Link href="/propietarios" className={`${button} shrink-0 border-charcoal hover:bg-charcoal hover:text-white`}>
+      {/* Propietarios: sección destacada, foto a todo el ancho */}
+      <section className="relative overflow-hidden bg-charcoal px-5 py-28 text-white md:px-12 md:py-40">
+        <img
+          src="/images/anual.webp"
+          alt=""
+          aria-hidden
+          className="photo-tone absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: "52% 50%" }}
+        />
+        <PhotoToneLayers />
+        <div aria-hidden className="absolute inset-0 bg-[#2d2620]/45" />
+        <div className="relative mx-auto max-w-[1240px]">
+          <SplitReveal as="h2" type="chars" className="text-center font-serif text-[56px] font-light leading-[0.95] md:text-[112px]">
+            {SITE.owners.title}
+          </SplitReveal>
+          <SplitReveal as="p" delay={160} className="mx-auto mt-8 max-w-xl text-center text-[16px] leading-relaxed text-white/85 md:text-[18px]">
+            {SITE.owners.text}
+          </SplitReveal>
+          <ol className="mt-16 grid border-t border-white/25 sm:grid-cols-2 lg:grid-cols-4">
+            {SITE.owners.steps.map((st, i) => (
+              <Reveal
+                as="li"
+                key={st.title}
+                delay={i * 90}
+                className="border-b border-white/25 py-7 sm:pr-7 lg:border-b-0 lg:border-r lg:px-7 lg:first:pl-0 lg:last:border-r-0"
+              >
+                <span className="font-serif text-lg italic text-white/60">0{i + 1}</span>
+                <h3 className="mt-5 font-serif text-3xl">{st.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/75">{st.text}</p>
+              </Reveal>
+            ))}
+          </ol>
+          <Reveal delay={200} className="mt-14 flex flex-wrap justify-center gap-3">
+            <Link href="/propietarios" className={`${button} border-white bg-white text-charcoal hover:bg-transparent hover:text-white`}>
               Arrienda o vende con nosotros
             </Link>
+            <a
+              href={whatsappLink(SITE.owners.whatsapp)}
+              target="_blank"
+              rel="noreferrer"
+              className={`${button} border-white/50 text-white hover:border-white`}
+            >
+              Escríbenos por WhatsApp
+            </a>
           </Reveal>
         </div>
       </section>
 
-      {/* Contacto */}
-      <section id="contacto" className="scroll-mt-10 bg-white px-5 py-28 md:px-12 md:py-40">
-        <div className="mx-auto grid max-w-[1240px] gap-14 md:grid-cols-[1fr_1.1fr] md:gap-24">
-          <div>
-            <Label>Contacto</Label>
-            <SplitReveal as="h2" type="chars" className="mt-4 font-serif text-5xl font-light md:text-7xl">
-              Conversemos
-            </SplitReveal>
-            <SplitReveal as="p" delay={160} className="mt-6 max-w-sm text-[15px] leading-relaxed text-graphite">
-              Cuéntanos qué buscas y agenda tu primera asesoría, sin costo. Si prefieres, escríbenos directo por WhatsApp.
-            </SplitReveal>
-            <Reveal delay={240}>
-              <a
-                href={whatsappLink(SITE.advisoryWhatsapp)}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-8 inline-block font-serif text-3xl underline decoration-charcoal/25 underline-offset-8 hover:decoration-charcoal"
-              >
-                {SITE.whatsappDisplay}
-              </a>
-            </Reveal>
-          </div>
-          <Reveal delay={120}>
-            <ContactForm
-              placeholder="Cuéntanos si quieres comprar, arrendar o invertir, y para cuándo."
-              submitLabel="Quiero mi asesoría gratuita"
-            />
+      {/* Asesoría gratuita + contacto, en una sola sección */}
+      <section id="asesoria" className="scroll-mt-10 bg-white px-5 py-28 md:px-12 md:py-40">
+        <span id="contacto" className="block scroll-mt-10" aria-hidden />
+        <div className="mx-auto max-w-[1240px] text-center">
+          <SplitReveal as="h2" type="chars" className="font-serif text-5xl font-light leading-[1.02] md:text-[84px]">
+            {SITE.advisory.title}
+          </SplitReveal>
+          <SplitReveal as="p" delay={150} className="mx-auto mt-7 max-w-xl text-[15px] leading-relaxed text-graphite">
+            {SITE.advisory.text}
+          </SplitReveal>
+          <Reveal delay={200} className="mt-7 flex flex-wrap justify-center gap-2">
+            {SITE.advisory.factors.map((f) => (
+              <span key={f} className="border border-charcoal/20 px-3 py-1.5 text-xs">
+                {f}
+              </span>
+            ))}
           </Reveal>
         </div>
+        <Reveal delay={120} className="mx-auto mt-16 max-w-2xl">
+          <ContactForm
+            placeholder="Cuéntanos si quieres comprar, arrendar o invertir, y para cuándo."
+            submitLabel="Quiero mi asesoría gratuita"
+          />
+          <p className="mt-12 text-center text-sm text-stone">
+            ¿Prefieres WhatsApp?{" "}
+            <a
+              href={whatsappLink(SITE.advisoryWhatsapp)}
+              target="_blank"
+              rel="noreferrer"
+              className="font-serif text-2xl text-charcoal underline decoration-charcoal/25 underline-offset-8 hover:decoration-charcoal"
+            >
+              {SITE.whatsappDisplay}
+            </a>
+          </p>
+        </Reveal>
       </section>
 
       <SiteFooter />

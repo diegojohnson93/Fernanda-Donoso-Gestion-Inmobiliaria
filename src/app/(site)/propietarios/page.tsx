@@ -10,12 +10,7 @@ export const metadata: Metadata = {
   description: "Arrienda o vende tu propiedad con asesoría personalizada en Viña del Mar, Valparaíso, Reñaca y Concón.",
 };
 
-const STEPS = [
-  { title: "Evaluamos", text: "Conocemos tu propiedad y te recomendamos la mejor modalidad: Airbnb, marzo a diciembre, año corrido o venta." },
-  { title: "Presentamos", text: "Buenas fotos, una ficha completa y publicación en nuestros canales." },
-  { title: "Gestionamos", text: "Respondemos a los interesados, coordinamos visitas y filtramos a los candidatos." },
-  { title: "Cerramos", text: "Negociación, documentos, contrato y entrega. Tú solo apruebas." },
-];
+const STEPS = SITE.owners.steps;
 
 export default function OwnersPage() {
   return (

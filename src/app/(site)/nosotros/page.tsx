@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
 import { ImageReveal } from "@/components/site/ImageReveal";
-import { Label } from "@/components/site/Label";
 import { MarqueeText } from "@/components/site/Marquee";
 import { CountUp, SplitReveal } from "@/components/site/Motion";
 import { PhotoToneLayers } from "@/components/site/PhotoHero";
@@ -39,12 +38,10 @@ export default function AboutPage() {
 
       {/* Declaración con sangría, línea por línea */}
       <section className="bg-white px-5 py-28 md:px-12 md:py-40">
-        <div className="mx-auto grid max-w-[1340px] gap-8 md:grid-cols-[1fr_3fr]">
-          <Label>Nosotros</Label>
+        <div className="mx-auto max-w-[1100px] text-center">
           <SplitReveal
             as="p"
             type="lines"
-            indent="22%"
             className="text-[28px] font-medium leading-[1.14] tracking-[-0.015em] md:text-[52px]"
           >
             {SITE.aboutPage.statement}
@@ -62,8 +59,7 @@ export default function AboutPage() {
             className="aspect-[4/5] w-full md:sticky md:top-16"
           />
           <div className="md:pt-6">
-            <Label>{SITE.about.eyebrow}</Label>
-            <SplitReveal as="h2" type="chars" className="mb-10 mt-4 font-serif text-[56px] font-light leading-[0.95] md:text-[88px]">
+            <SplitReveal as="h2" type="chars" className="mb-10 font-serif text-[56px] font-light leading-[0.95] md:text-[88px]">
               {SITE.about.title}
             </SplitReveal>
             {SITE.about.paragraphs.map((t, i) => (
@@ -80,6 +76,26 @@ export default function AboutPage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Cómo te asesoramos (viene del inicio) */}
+      <section className="bg-white px-5 pb-28 md:px-12 md:pb-40">
+        <div className="mx-auto max-w-[900px] border-t border-charcoal/12 pt-20 md:pt-28">
+          <SplitReveal as="h2" type="lines" className="text-center font-serif text-5xl font-light leading-[1.02] md:text-6xl">
+            De la primera conversación a la entrega
+          </SplitReveal>
+          <ol className="mt-14 border-t border-charcoal/12">
+            {SITE.advisory.steps.map((st, i) => (
+              <Reveal as="li" key={st.title} delay={i * 80} className="flex gap-6 border-b border-charcoal/12 py-8 md:gap-10 md:py-10">
+                <span className="w-10 font-serif text-6xl font-light leading-none text-taupe md:text-7xl">{i + 1}</span>
+                <div className="pt-1">
+                  <h3 className="font-serif text-3xl">{st.title}</h3>
+                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-graphite">{st.text}</p>
+                </div>
+              </Reveal>
+            ))}
+          </ol>
         </div>
       </section>
 
@@ -104,8 +120,7 @@ export default function AboutPage() {
 
       {/* Llamado a la acción */}
       <section className="bg-cream px-5 py-24 text-center md:px-12 md:py-32">
-        <Label>{SITE.advisory.eyebrow}</Label>
-        <SplitReveal as="h2" type="chars" className="mx-auto mt-4 max-w-3xl font-serif text-5xl font-light md:text-7xl">
+        <SplitReveal as="h2" type="chars" className="mx-auto max-w-3xl font-serif text-5xl font-light md:text-7xl">
           Conversemos sin costo
         </SplitReveal>
         <SplitReveal as="p" delay={150} className="mx-auto mt-6 max-w-md text-[15px] leading-relaxed text-graphite">

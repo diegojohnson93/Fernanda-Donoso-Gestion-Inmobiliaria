@@ -99,7 +99,15 @@ export const SITE = {
   },
 
   owners: {
+    eyebrow: "Propietarios",
     title: "¿Tienes una propiedad?",
+    steps: [
+      { title: "Evaluamos", text: "Conocemos tu propiedad y te recomendamos la mejor modalidad: Airbnb, marzo a diciembre, año corrido o venta." },
+      { title: "Presentamos", text: "Buenas fotos, una ficha completa y publicación en nuestros canales." },
+      { title: "Gestionamos", text: "Respondemos a los interesados, coordinamos visitas y filtramos a los candidatos." },
+      { title: "Cerramos", text: "Negociación, documentos, contrato y entrega. Tú solo apruebas." },
+    ],
+    whatsapp: "Hola Fernanda, tengo una propiedad y quiero arrendarla o venderla",
     text: "Te asesoramos para arrendarla o venderla en las mejores condiciones: la evaluamos contigo, la presentamos con buenas fotos y nos encargamos de los interesados.",
   },
 };
