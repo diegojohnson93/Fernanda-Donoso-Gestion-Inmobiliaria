@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recorrido 3D monoambiente</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: escena 3D a pantalla completa; controles flotantes arriba (vistas) y abajo (movimiento y ayuda). Tema único claro. */
+:root{--paper:#fbf8f2;--ink:#2a2420;--muted:#6f645b;--line:#d9cfc2;--accent:#b9573a;--sky:#cfe3ee;
+ --display:"Archivo","Helvetica Neue",Arial,sans-serif;--body:"IBM Plex Sans","Segoe UI",Arial,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--sky);color:var(--ink);font-family:var(--body);font-size:14px;overflow:hidden}
+canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.top{position:fixed;left:16px;right:16px;top:12px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;pointer-events:none}
+.top>*{pointer-events:auto}
+h1{font:700 16px var(--display);margin:0;background:var(--paper);padding:8px 12px;border-radius:6px;border:1px solid var(--line)}
+.grp{display:flex;flex-wrap:wrap;gap:4px;background:var(--paper);padding:4px;border-radius:6px;border:1px solid var(--line)}
+button{font:500 13px var(--body);color:var(--ink);background:transparent;border:1px solid transparent;border-radius:4px;padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button[aria-pressed="true"]{background:var(--accent);color:#fff}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bottom{position:fixed;left:16px;right:16px;bottom:12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;pointer-events:none}
+.bottom>*{pointer-events:auto}
+.help{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:8px 12px;max-width:420px;margin:0;color:var(--muted)}
+.pad{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px);gap:4px;background:var(--paper);padding:4px;border-radius:6px;border:1px solid var(--line)}
+.pad button{font-size:18px;padding:0;border-color:var(--line);user-select:none;touch-action:none}
+#err{position:fixed;inset:0;display:none;place-items:center;padding:24px;text-align:center;background:var(--paper)}
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Recorrido 3D del monoambiente"></canvas>
+<div class="top">
+  <h1>Recorrido 3D monoambiente</h1>
+  <div class="grp" id="vistas"></div>
+  <div class="grp">
+    <button id="b-aerea" type="button" aria-pressed="false">Vista aérea</button>
+    <button id="b-cortinas" type="button" aria-pressed="true">Cortinas</button>
+    <button id="b-muebles" type="button" aria-pressed="true">Muebles</button>
+  </div>
+</div>
+<div class="bottom">
+  <p class="help" id="help">Arrastra para mirar. Camina con W A S D o las flechas, o con los botones. La rueda del mouse avanza y retrocede.</p>
+  <div class="pad" aria-label="Movimiento">
+    <button type="button" data-k="tl" aria-label="Girar a la izquierda">↺</button>
+    <button type="button" data-k="f" aria-label="Avanzar">▲</button>
+    <button type="button" data-k="tr" aria-label="Girar a la derecha">↻</button>
+    <button type="button" data-k="l" aria-label="Paso a la izquierda">◀</button>
+    <button type="button" data-k="b" aria-label="Retroceder">▼</button>
+    <button type="button" data-k="r" aria-label="Paso a la derecha">▶</button>
+  </div>
+</div>
+<div id="err"><p>Este navegador no pudo iniciar el 3D (WebGL). Prueba abrirlo en Chrome o Safari actualizados.</p></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const M = {"meta":{"nombre":"Monoambiente — plano base","version":3,"unidades":"metros","origen":"esquina interior norponiente del ambiente principal; x hacia la derecha, y hacia abajo","escala_origen":"100 pt del PDF = 1 m (cama 150 cm)","altura_piso_cielo":2.25,"norte_grados":12,"norte_nota":"Supuesto: el ventanal de la terraza grande mira al nororiente; el norte queda 12° a la derecha de la vertical del plano","muros":{"exterior":0.15,"tabique":0.09,"nota":"espesores estándar supuestos; el original dibuja línea simple"}},"recintos":[{"id":"ambiente","nombre":"Ambiente principal","tipo":"interior","pts":[[0.0,0.0],[2.988,0.0],[2.988,0.086],[5.739,4.325],[4.742,4.325],[4.742,5.473],[3.014,5.473],[3.014,6.024],[2.131,6.024],[2.131,2.992],[0.0,2.992]],"area_m2":19.4,"label":[1.15,2.45]},{"id":"closet","nombre":"Closet","tipo":"interior","pts":[[0.221,2.992],[2.04,2.992],[2.04,3.503],[0.221,3.503]],"area_m2":0.93,"label":[1.13,3.25],"puertas":"correderas (2 hojas); evaluar cambio a puertas abatibles","nota":"empotrado; tabique de 9 cm a la derecha"},{"id":"cocina","nombre":"Cocina","tipo":"interior","pts":[[4.824,4.425],[5.64,4.425],[5.888,4.884],[5.892,6.058],[4.824,6.058]],"area_m2":1.68,"label":[5.1,4.72]},{"id":"bano","nombre":"Baño","tipo":"interior","pts":[[3.858,5.568],[4.733,5.568],[4.733,6.14],[5.896,6.14],[5.896,7.321],[3.858,7.321]],"area_m2":2.91,"label":[4.3,6.38]},{"id":"terraza1","nombre":"Terraza poniente","tipo":"terraza","pts":[[0.0,0.0],[0.0,1.7],[-1.322,1.7],[-1.322,0.587],[-0.631,0.0]],"area_m2":2.04,"label":[-0.42,0.62],"corto":"TERRAZA"},{"id":"terraza2","nombre":"Terraza nororiente","tipo":"terraza","pts":[[3.812,1.313],[4.522,0.851],[5.418,1.041],[7.207,3.794],[7.012,4.713],[6.316,5.166]],"area_m2":6.44,"label":[6.05,2.55],"corto":"TERRAZA"}],"estructura":[{"id":"muro_est_1","nombre":"Muro estructural (terraza–closet)","x":0.078,"y":2.349,"w":0.26,"d":1.3,"rot":0},{"id":"muro_est_2","nombre":"Muro estructural (acceso)","x":3.437,"y":5.752,"w":0.83,"d":0.54,"rot":0}],"vanos":[{"id":"puerta_entrada","nombre":"Puerta de entrada","tipo":"puerta","a":[2.172,6.024],"b":[2.981,6.024],"bisagra":"b","abre":"ambiente","alto":2.0,"ancho":0.81,"dib":{"c":7.5,"t":17,"lado":-1}},{"id":"puerta_bano","nombre":"Puerta baño","tipo":"puerta","a":[3.882,5.52],"b":[4.696,5.52],"bisagra":"a","abre":"bano","alto":2.0,"ancho":0.81,"dib":{"c":0,"t":11,"lado":1}},{"id":"vano_cocina","nombre":"Vano cocina (marco sin puerta)","tipo":"vano","a":[4.782,4.811],"b":[4.782,5.464],"alto":2.0,"ancho":0.65,"dib":{"c":0,"t":10,"lado":0}},{"id":"ventanal_t1","nombre":"Ventanal a terraza poniente","tipo":"ventanal","a":[0.0,0.0],"b":[0.0,1.698],"antepecho":0,"alto":2.0,"ancho":1.7,"dib":{"c":7.5,"t":17,"lado":0}},{"id":"ventana_norte","nombre":"Ventana sobre velador","tipo":"ventana","a":[0.053,0.0],"b":[0.878,0.0],"antepecho":0.55,"alto":1.6,"ancho":0.82,"dib":{"c":-7.5,"t":17,"lado":0}},{"id":"ventanal_t2","nombre":"Ventanal a terraza nororiente","tipo":"ventanal","a":[4.326,2.204],"b":[5.65,4.227],"antepecho":0,"alto":2.0,"ancho":2.42,"dib":{"c":-7.5,"t":17,"lado":0}},{"id":"ventana_cocina","nombre":"Ventana cocina","tipo":"ventana","a":[5.894,4.905],"b":[5.894,6.053],"antepecho":1.1,"alto":0.9,"ancho":1.15,"dib":{"c":-7.5,"t":17,"lado":0}},{"id":"ventana_bano","nombre":"Ventana baño","tipo":"ventana","a":[5.896,6.169],"b":[5.896,7.317],"antepecho":1.5,"alto":0.5,"ancho":1.15,"dib":{"c":-7.5,"t":17,"lado":0}}],"fijos":[{"id":"meson","nombre":"Mesón cocina (refrigerador bajo cubierta)","forma":"poly","zona":"cocina","alto":0.9,"pts":[[4.824,6.058],[4.824,5.461],[5.393,5.461],[5.393,4.425],[5.64,4.425],[5.888,4.884],[5.892,6.058]]},{"id":"lavaplatos","nombre":"Lavaplatos","forma":"rect","zona":"cocina","x":5.638,"y":5.13,"w":0.4,"d":0.4,"rot":0},{"id":"encimera","nombre":"Encimera 2 platos","forma":"rect","zona":"cocina","x":5.627,"y":5.768,"w":0.29,"d":0.43,"rot":0},{"id":"lavamanos","nombre":"Lavamanos","forma":"rect","zona":"bano","alto":0.85,"x":4.183,"y":7.044,"w":0.6,"d":0.51,"rot":0},{"id":"wc","nombre":"WC","forma":"rect","zona":"bano","alto":0.75,"x":4.806,"y":6.948,"w":0.36,"d":0.7,"rot":0},{"id":"ducha","nombre":"Ducha","forma":"rect","zona":"bano","alto":0.05,"x":5.502,"y":6.741,"w":0.73,"d":1.15,"rot":0},{"id":"lavadora","nombre":"Lavadora (termo eléctrico arriba)","forma":"rect","zona":"terraza2","alto":0.85,"x":6.223,"y":4.462,"w":0.6,"d":0.6,"rot":-32.7}],"muebles":[{"id":"alfombra","nombre":"Alfombra yute","color":"#d9c3a0","alto":0.02,"zona":"ambiente","forma":"rect","x":3.534,"y":3.747,"w":1.65,"d":2.22,"rot":0},{"id":"cama","nombre":"Cama 150 × 190","color":"#c9b299","alto":0.5,"zona":"ambiente","forma":"rect","x":1.628,"y":0.976,"w":1.49,"d":1.89,"rot":0},{"id":"velador_izq","nombre":"Velador izquierdo","color":"#9c7654","alto":0.55,"zona":"ambiente","forma":"rect","x":0.614,"y":0.228,"w":0.4,"d":0.4,"rot":0},{"id":"velador_der","nombre":"Velador derecho","color":"#9c7654","alto":0.55,"zona":"ambiente","forma":"rect","x":2.626,"y":0.228,"w":0.4,"d":0.4,"rot":0},{"id":"planta","nombre":"Planta","color":"#4f8a4a","alto":1.0,"zona":"ambiente","forma":"circ","x":3.058,"y":0.73,"r":0.3},{"id":"escritorio","nombre":"Escritorio","color":"#f0bd6b","alto":0.75,"zona":"ambiente","forma":"rect","x":3.51,"y":1.513,"w":0.59,"d":1.2,"rot":-33.0},{"id":"silla_escritorio","nombre":"Silla escritorio","color":"#f4f1ea","alto":0.45,"zona":"ambiente","forma":"rect","x":3.142,"y":1.771,"w":0.42,"d":0.24,"rot":57,"redondo":true},{"id":"poltrona","nombre":"Poltrona","color":"#15994f","alto":0.8,"zona":"ambiente","forma":"rect","x":2.571,"y":3.449,"w":0.78,"d":0.64,"rot":-82.2},{"id":"mesa_lateral","nombre":"Mesa lateral","color":"#9c7654","alto":0.45,"zona":"ambiente","forma":"circ","x":2.394,"y":4.067,"r":0.2},{"id":"silla_1","nombre":"Silla comedor 1","color":"#f0bd6b","alto":0.45,"zona":"ambiente","forma":"rect","x":5.025,"y":3.989,"w":0.4,"d":0.4,"rot":-70.0},{"id":"silla_2","nombre":"Silla comedor 2","color":"#f0bd6b","alto":0.45,"zona":"ambiente","forma":"rect","x":4.175,"y":4.159,"w":0.4,"d":0.4,"rot":-40.1},{"id":"mesa_comedor","nombre":"Mesa comedor Ø80","color":"#f9ad47","alto":0.75,"zona":"ambiente","forma":"circ","x":4.57,"y":3.808,"r":0.4},{"id":"recibidor","nombre":"Recibidor bajo (decoración arriba, guardado abajo)","color":"#c9a676","alto":0.8,"zona":"ambiente","forma":"rect","x":3.431,"y":5.33,"w":0.81,"d":0.28,"rot":0},{"id":"mesa_terraza","nombre":"Mesa terraza","color":"#9c7654","alto":0.45,"zona":"terraza1","forma":"circ","x":-0.929,"y":1.039,"r":0.29},{"id":"piso_1","nombre":"Piso terraza 1","color":"#825e3b","alto":0.45,"zona":"terraza1","forma":"circ","x":-0.515,"y":0.925,"r":0.18},{"id":"piso_2","nombre":"Piso terraza 2","color":"#825e3b","alto":0.45,"zona":"terraza1","forma":"circ","x":-0.698,"y":1.376,"r":0.18},{"id":"sillon_terraza","nombre":"Sillón terraza (idea: silla colgante)","color":"#ffebd6","alto":0.45,"zona":"terraza2","forma":"rect","x":4.473,"y":1.507,"w":0.75,"d":0.5,"rot":71,"redondo":true}]};
+</script>
+<script>
+(function(){
+if(!window.THREE){document.getElementById('err').style.display='grid';return;}
+const H=M.meta.altura_piso_cielo, EYE=1.55;
+const C={muro:0xf6f4ef,roble:'#d9c09b',madera:0xc9a676,maderaOsc:0x9a7650,terracota:0xb9573a,lino:0xefe6d6,beige:0xdccdb6,arena:0xcbb28a,salvia:0x8b9b7c,negro:0x2b2826,blanco:0xfafafa,acero:0xb9bec2,yute:0xcdb58c,verde:0x4d7a45,terraza:0xb9b6ae};
+const canvas=document.getElementById('c');
+let renderer;
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:true});}catch(e){document.getElementById('err').style.display='grid';return;}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xcfe3ee);scene.fog=new THREE.Fog(0xcfe3ee,30,90);
+const cam=new THREE.PerspectiveCamera(72,1,0.05,200);cam.rotation.order='YXZ';
+
+// luz
+scene.add(new THREE.HemisphereLight(0xffffff,0xcbb89c,0.5));scene.add(new THREE.AmbientLight(0xffffff,0.12));
+const sun=new THREE.DirectionalLight(0xfff0d8,0.95);sun.position.set(3+10.1,12.3,3.5-12.1);sun.target.position.set(3,0,3.5);
+sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);const sc=sun.shadow.camera;sc.left=-9;sc.right=9;sc.top=9;sc.bottom=-9;sc.near=1;sc.far=50;sun.shadow.bias=-0.0006;sun.shadow.normalBias=0.02;
+scene.add(sun,sun.target);
+
+// helpers
+const mat=(color,o={})=>new THREE.MeshStandardMaterial(Object.assign({color,roughness:.85,metalness:0},o));
+function box(w,h,d,m,x,y,z,p){const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),typeof m==='number'?mat(m):m);b.position.set(x,y,z);b.castShadow=b.receiveShadow=true;(p||scene).add(b);return b;}
+function cyl(r,h,m,x,y,z,p,r2){const b=new THREE.Mesh(new THREE.CylinderGeometry(r2==null?r:r2,r,h,28),typeof m==='number'?mat(m):m);b.position.set(x,y,z);b.castShadow=b.receiveShadow=true;(p||scene).add(b);return b;}
+function shape(pts){const s=new THREE.Shape();pts.forEach((p,i)=>i?s.lineTo(p[0],p[1]):s.moveTo(p[0],p[1]));return s;}
+function slab(pts,y0,h,m,p){const g=new THREE.ExtrudeGeometry(shape(pts),{depth:h,bevelEnabled:false});g.rotateX(Math.PI/2);const b=new THREE.Mesh(g,m);b.position.y=y0+h;b.castShadow=b.receiveShadow=true;(p||scene).add(b);return b;}
+function pip(x,y,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c;}return c;}
+const R=id=>M.recintos.find(r=>r.id===id), V=id=>M.vanos.find(v=>v.id===id);
+
+// textura porcelanato imitación madera (roble claro)
+function woodTex(){const c=document.createElement('canvas');c.width=c.height=1024;const g=c.getContext('2d');const pw=1024/12,pl=512;let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  for(let r=0;r<12;r++){const off=(r%2)*pl/2+rnd()*120;for(let k=-1;k<3;k++){const x=k*pl+off,l=18+rnd()*10;g.fillStyle=`hsl(${33+rnd()*4},${34+rnd()*8}%,${70+l-23}%)`;g.fillRect(x,r*pw,pl,pw);
+      for(let i=0;i<14;i++){g.strokeStyle=`rgba(120,88,52,${.05+rnd()*.09})`;g.lineWidth=.6+rnd()*1.4;const y=r*pw+rnd()*pw;g.beginPath();g.moveTo(x,y);g.bezierCurveTo(x+pl*.3,y+rnd()*6-3,x+pl*.7,y+rnd()*6-3,x+pl,y+rnd()*4-2);g.stroke();}
+      g.fillStyle='rgba(90,66,40,.5)';g.fillRect(x,r*pw,1.5,pw);}
+    g.fillStyle='rgba(90,66,40,.45)';g.fillRect(0,r*pw,1024,1.5);}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1/2.4,1/2.4);t.encoding=THREE.sRGBEncoding;t.anisotropy=renderer.capabilities.getMaxAnisotropy();return t;}
+const mPiso=new THREE.MeshStandardMaterial({map:woodTex(),roughness:.55,side:THREE.DoubleSide});
+const mTerr=mat(C.terraza,{roughness:.9,side:THREE.DoubleSide});
+const mMuro=mat(C.muro,{roughness:.95});
+const mVidrio=new THREE.MeshStandardMaterial({color:0xcfe8ee,transparent:true,opacity:.18,roughness:.05,metalness:.1,side:THREE.DoubleSide});
+
+// pisos y cielos
+const cielos=new THREE.Group();scene.add(cielos);
+const interiores=M.recintos.filter(r=>r.tipo==='interior');
+for(const r of M.recintos){const g=new THREE.ShapeGeometry(shape(r.pts));g.rotateX(Math.PI/2);const f=new THREE.Mesh(g,r.tipo==='interior'?mPiso:mTerr);f.position.y=r.tipo==='interior'?0:-0.02;f.receiveShadow=true;scene.add(f);
+  slab(r.pts,H,0.12,mMuro,cielos);}
+const suelo=box(80,0.1,80,mat(0x8fa283,{roughness:1}),3,-14,3.5);suelo.castShadow=suelo.receiveShadow=false;
+
+// muros a partir de los bordes de cada recinto interior
+const vidrioHecho={};
+function vanoEn(px,py,ux,uy){for(const v of M.vanos){const dx=v.b[0]-v.a[0],dy=v.b[1]-v.a[1],L=Math.hypot(dx,dy),vx=dx/L,vy=dy/L;if(Math.abs(ux*vx+uy*vy)<.9)continue;const al=(px-v.a[0])*vx+(py-v.a[1])*vy,pe=Math.abs((px-v.a[0])*-vy+(py-v.a[1])*vx);if(al>0.01&&al<L-0.01&&pe<0.07)return v;}return null;}
+function muroBox(a,ux,uy,ox,oy,s0,s1,t,y0,y1){if(y1-y0<0.01||s1-s0<0.005)return;const sm=(s0+s1)/2;const b=box(s1-s0,y1-y0,t,mMuro,a[0]+ux*sm+ox*t/2,(y0+y1)/2,a[1]+uy*sm+oy*t/2);b.rotation.y=-Math.atan2(uy,ux);}
+for(const r of interiores){const P=r.pts,n=P.length;let A=0;for(let i=0;i<n;i++){const a=P[i],b=P[(i+1)%n];A+=a[0]*b[1]-b[0]*a[1];}const s=A>0?1:-1;
+  const dir=i=>{const a=P[i],b=P[(i+1)%n],L=Math.hypot(b[0]-a[0],b[1]-a[1]);return[(b[0]-a[0])/L,(b[1]-a[1])/L,L];};
+  for(let i=0;i<n;i++){const a=P[i],[ux,uy,L]=dir(i),ox=uy*s,oy=-ux*s;const pv=dir((i+n-1)%n),nx=dir((i+1)%n);
+    const cv0=(pv[0]*uy-pv[1]*ux)*s>0,cv1=(ux*nx[1]-uy*nx[0])*s>0;
+    const N=Math.max(1,Math.ceil(L/0.05)),st=L/N;let runs=[];
+    for(let k=0;k<N;k++){const px=a[0]+ux*(k+.5)*st,py=a[1]+uy*(k+.5)*st;let t=0.15;
+      for(let d=0.02;d<0.151;d+=0.01){if(interiores.some(o=>o!==r&&pip(px+ox*d,py+oy*d,o.pts))){t=Math.round(d*100)/100;break;}}
+      const v=vanoEn(px,py,ux,uy);const key=t<0.04?'none':(v?v.id:'w')+'|'+t;const last=runs[runs.length-1];
+      if(last&&last.key===key)last.s1=(k+1)*st;else runs.push({key,s0:k*st,s1:(k+1)*st,t,v});}
+    runs.forEach((q,j)=>{if(q.key==='none')return;let s0=q.s0,s1=q.s1;
+      if(!q.v){if(j===0&&cv0)s0-=q.t;if(j===runs.length-1&&cv1)s1+=q.t;muroBox(a,ux,uy,ox,oy,s0,s1,q.t,0,H);return;}
+      const v=q.v,sill=v.antepecho||0,head=sill+v.alto;muroBox(a,ux,uy,ox,oy,s0,s1,q.t,0,sill);muroBox(a,ux,uy,ox,oy,s0,s1,q.t,head,H);
+      if((v.tipo==='ventana'||v.tipo==='ventanal')&&!vidrioHecho[v.id]){vidrioHecho[v.id]=1;const sm=(s0+s1)/2,cx=a[0]+ux*sm+ox*q.t/2,cz=a[1]+uy*sm+oy*q.t/2,ry=-Math.atan2(uy,ux);
+        const g=box(s1-s0,head-sill,0.012,mVidrio,cx,(sill+head)/2,cz);g.rotation.y=ry;g.castShadow=false;
+        const fr=mat(0xe9e9e6,{roughness:.5});[[s1-s0,0.05,0,head-0.025],[s1-s0,0.05,0,sill+0.025]].forEach(([w,h,dx,y])=>{const f=box(w,h,0.05,fr,cx,y,cz);f.rotation.y=ry;});
+        const nb=v.tipo==='ventanal'?[-.5,0,.5]:[-.5,.5];nb.forEach(k=>{const f=box(0.05,head-sill,0.05,fr,cx+ux*k*(s1-s0-0.05),(sill+head)/2,cz+uy*k*(s1-s0-0.05));f.rotation.y=ry;});}
+    });}}
+for(const e of M.estructura) box(e.w,H,e.d,mMuro,e.x,H/2,e.y);
+
+// puertas
+(function(){const mP=mat(C.madera,{roughness:.6});
+  const e=V('puerta_entrada');box(e.ancho,2.0,0.045,mP,(e.a[0]+e.b[0])/2,1.0,e.a[1]+0.08);cyl(0.02,0.1,C.negro,e.a[0]+0.08,1.0,e.a[1]+0.03).rotation.x=Math.PI/2;
+  const b=V('puerta_bano');box(0.04,2.0,b.ancho-0.02,mP,b.a[0]+0.02,1.0,b.a[1]+0.05+b.ancho/2);
+  // closet: dos hojas correderas
+  const c=R('closet').pts,w=(c[1][0]-c[0][0])/2;box(w+0.04,2.1,0.03,mat(C.lino,{roughness:.7}),c[0][0]+w/2,1.05,c[0][1]+0.03);box(w+0.04,2.1,0.03,mat(C.lino,{roughness:.7}),c[0][0]+w*1.5,1.05,c[0][1]+0.07);
+  box(w*2,H-2.1,0.1,mMuro,c[0][0]+w,(H+2.1)/2,c[0][1]+0.05);
+})();
+
+// barandas de terrazas
+const SKIPT={terraza1:[0],terraza2:[5]};
+for(const r of M.recintos.filter(r=>r.tipo==='terraza')){const P=r.pts;P.forEach((a,i)=>{if(SKIPT[r.id].includes(i))return;const b=P[(i+1)%P.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]),ry=-Math.atan2(b[1]-a[1],b[0]-a[0]),cx=(a[0]+b[0])/2,cz=(a[1]+b[1])/2;
+  const g=box(L,1.0,0.02,mVidrio,cx,0.5,cz);g.rotation.y=ry;g.castShadow=false;const t=box(L+0.04,0.04,0.05,mat(C.negro,{roughness:.4}),cx,1.02,cz);t.rotation.y=ry;});}
+
+// cortinas: velo de lino a piso
+const cortinas=new THREE.Group();scene.add(cortinas);
+const mVelo=new THREE.MeshStandardMaterial({color:C.lino,transparent:true,opacity:.78,roughness:1,side:THREE.DoubleSide});
+function velo(v,y0,off){const dx=v.b[0]-v.a[0],dy=v.b[1]-v.a[1],L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;let nx=-uy,ny=ux;const mx=(v.a[0]+v.b[0])/2,my=(v.a[1]+v.b[1])/2;if(!pip(mx+nx*.2,my+ny*.2,R('ambiente').pts)){nx=-nx;ny=-ny;}
+  const w=Math.max(0.3,L*0.3),h=2.2-y0;[w/2-0.05,L-w/2+0.05].forEach(s=>{const g=new THREE.PlaneGeometry(w,h,40,1),p=g.attributes.position;for(let i=0;i<p.count;i++)p.setZ(i,Math.sin(p.getX(i)*46)*0.022);g.computeVertexNormals();
+    const m=new THREE.Mesh(g,mVelo);m.position.set(v.a[0]+ux*s+nx*off,y0+h/2,v.a[1]+uy*s+ny*off);m.rotation.y=-Math.atan2(uy,ux);m.receiveShadow=true;cortinas.add(m);});
+  const riel=box(L+0.2,0.025,0.025,mat(C.negro,{roughness:.4}),mx+nx*off,2.21,my+ny*off,cortinas);riel.rotation.y=-Math.atan2(uy,ux);}
+velo(V('ventanal_t1'),0.02,0.1);velo(V('ventanal_t2'),0.02,0.1);velo(V('ventana_norte'),0.6,0.06);
+
+// muebles
+const muebles=new THREE.Group();scene.add(muebles);
+const byId=id=>M.muebles.find(m=>m.id===id);
+function grupo(it,parent){const g=new THREE.Group();g.position.set(it.x,0,it.y);g.rotation.y=-(it.rot||0)*Math.PI/180;(parent||muebles).add(g);return g;}
+// subgrupo orientado: el respaldo queda en -z local, mirando hacia ref
+function orientado(it,ref){const g=grupo(it),a=(it.rot||0)*Math.PI/180,vx=it.x-ref[0],vy=it.y-ref[1],lx=vx*Math.cos(a)+vy*Math.sin(a),lz=-vx*Math.sin(a)+vy*Math.cos(a);
+  let k=Math.abs(lx)>Math.abs(lz)?(lx>0?1:3):(lz>0?2:0);const s=new THREE.Group();s.rotation.y=[0,Math.PI/2,Math.PI,-Math.PI/2][k]*(k%2?-1:1);g.add(s);const sw=k%2?it.d:it.w,sd=k%2?it.w:it.d;return{s,w:sw,d:sd};}
+function patas(p,w,d,h,m,r=0.018){[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([a,b])=>cyl(r,h,m,a*(w/2-0.04),h/2,b*(d/2-0.04),p));}
+function silla(it,ref,col){const{s,w,d}=orientado(it,ref);box(w,0.05,d,col,0,0.45,0,s);patas(s,w,d,0.43,C.madera);box(w,0.42,0.035,col,0,0.7,-d/2+0.02,s);}
+function butaca(it,ref,col){const{s,w,d}=orientado(it,ref);box(w-0.16,0.2,d-0.1,col,0,0.33,0.05,s);box(w,0.52,0.14,col,0,0.5,-d/2+0.07,s);[-1,1].forEach(k=>box(0.08,0.32,d,C.madera,k*(w/2-0.04),0.4,0,s));patas(s,w,d,0.24,C.madera,0.022);}
+
+(function(){let it,g;
+  it=byId('alfombra');g=grupo(it);box(it.w,0.015,it.d,mat(C.yute,{roughness:1}),0,0.008,0,g).castShadow=false;
+  it=byId('cama');g=grupo(it);box(it.w,0.26,it.d,C.madera,0,0.13,0,g);box(it.w-0.02,0.22,it.d-0.04,C.blanco,0,0.37,0.01,g);box(it.w+0.03,0.07,it.d*0.66,C.lino,0,0.5,it.d*0.17,g);box(it.w+0.05,0.075,0.5,C.terracota,0,0.505,it.d/2-0.3,g);
+    [-1,1].forEach(k=>box(0.62,0.13,0.38,C.blanco,k*0.36,0.54,-it.d/2+0.3,g));box(0.5,0.12,0.3,C.arena,0,0.56,-it.d/2+0.52,g);box(it.w+0.06,1.0,0.05,C.arena,0,0.5,-it.d/2+0.0,g);
+  ['velador_izq','velador_der'].forEach(id=>{it=byId(id);g=grupo(it);box(it.w,0.38,it.d,C.madera,0,0.31,0,g);patas(g,it.w,it.d,0.12,C.maderaOsc);cyl(0.06,0.02,C.negro,0,0.51,0.02,g);cyl(0.012,0.22,C.negro,0,0.62,0.02,g);cyl(0.11,0.16,mat(C.lino,{emissive:0xffd9a0,emissiveIntensity:.5}),0,0.8,0.02,g,0.08);});
+  it=byId('planta');g=grupo(it);cyl(0.14,0.34,C.terracota,0,0.17,0,g,0.17);for(let i=0;i<9;i++){const a=i*2.4,l=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.75,6),mat(C.verde,{flatShading:true}));l.position.set(Math.cos(a)*0.13,0.7,Math.sin(a)*0.13);l.rotation.z=-Math.cos(a)*0.45;l.rotation.x=Math.sin(a)*0.45;l.castShadow=true;g.add(l);}
+  it=byId('escritorio');g=grupo(it);box(it.w,0.04,it.d,C.madera,0,0.73,0,g);patas(g,it.w,it.d,0.71,C.negro,0.015);box(0.3,0.02,0.22,C.acero,0,0.76,-0.1,g);
+  silla(byId('silla_escritorio'),[byId('escritorio').x,byId('escritorio').y],C.lino);
+  const mc=byId('mesa_comedor');g=grupo(mc);cyl(mc.r,0.04,C.madera,0,0.73,0,g);cyl(0.05,0.69,C.maderaOsc,0,0.36,0,g);cyl(0.26,0.03,C.maderaOsc,0,0.015,0,g);cyl(0.07,0.14,C.terracota,0,0.82,0,g,0.05);
+    cyl(0.004,H-1.75,C.negro,0,(H+1.75)/2,0,g).castShadow=false;cyl(0.2,0.2,mat(C.terracota,{side:THREE.DoubleSide}),0,1.65,0,g,0.06);const pl=new THREE.PointLight(0xffd9a8,0.35,6,2);pl.position.set(0,1.5,0);g.add(pl);
+  silla(byId('silla_1'),[mc.x,mc.y],C.beige);silla(byId('silla_2'),[mc.x,mc.y],C.beige);
+  butaca(byId('poltrona'),[3.53,3.75],C.terracota);
+  it=byId('mesa_lateral');g=grupo(it);cyl(it.r,0.03,C.maderaOsc,0,0.46,0,g);cyl(0.02,0.45,C.negro,0,0.225,0,g);cyl(0.14,0.02,C.negro,0,0.01,0,g);
+  it=byId('recibidor');g=grupo(it);box(it.w,0.04,it.d,C.madera,0,0.78,0,g);box(it.w-0.02,0.5,it.d-0.02,C.madera,0,0.51,0,g);patas(g,it.w,it.d,0.26,C.negro,0.012);[-1,0,1].forEach(k=>box(0.005,0.48,0.01,C.maderaOsc,k*(it.w-0.02)/3/1.5*(k?1:0),0.51,-it.d/2+0.006,g));cyl(0.05,0.24,C.terracota,-it.w/2+0.14,0.92,0,g,0.035);for(let i=0;i<5;i++){const l=cyl(0.004,0.4,C.arena,-it.w/2+0.14+(i-2)*0.02,1.2,0,g);l.rotation.z=-(i-2)*0.12;}box(0.26,0.03,0.18,C.arena,0.12,0.815,0,g);box(0.22,0.03,0.16,C.terracota,0.12,0.845,0,g);cyl(0.06,0.05,C.lino,it.w/2-0.1,0.825,0.02,g);const esp=cyl(0.3,0.02,mat(0xdce8ec,{metalness:.15,roughness:.12}),0,1.5,it.d/2-0.012,g);esp.rotation.x=Math.PI/2;const marco=cyl(0.32,0.015,C.negro,0,1.5,it.d/2-0.004,g);marco.rotation.x=Math.PI/2;
+  it=byId('mesa_terraza');g=grupo(it);cyl(it.r,0.03,C.maderaOsc,0,0.45,0,g);cyl(0.03,0.44,C.negro,0,0.22,0,g);
+  ['piso_1','piso_2'].forEach(id=>{it=byId(id);g=grupo(it);cyl(it.r,0.4,C.yute,0,0.2,0,g);});
+  butaca(byId('sillon_terraza'),[7.0,2.4],C.lino);
+})();
+
+// fijos: cocina, baño, lavadora
+(function(){const F=id=>M.fijos.find(f=>f.id===id);let it,g;
+  const me=F('meson');slab(me.pts,0.08,0.78,mat(C.salvia,{roughness:.7}));slab(me.pts,0,0.08,mat(C.negro));slab(me.pts,0.86,0.04,mat(C.madera,{roughness:.5}));
+  it=F('lavaplatos');g=grupo(it,scene);box(it.w,0.012,it.d,mat(C.acero,{metalness:.7,roughness:.3}),0,0.905,0,g);box(it.w-0.08,0.014,it.d-0.08,mat(0x8d9296,{metalness:.7,roughness:.4}),0,0.906,0,g);cyl(0.012,0.22,C.acero,it.w/2-0.03,1.01,0,g);
+  it=F('encimera');g=grupo(it,scene);box(it.w,0.012,it.d,mat(C.negro,{roughness:.3}),0,0.906,0,g);cyl(0.07,0.02,0x4a4744,0,0.915,-it.d/4,g);cyl(0.085,0.02,0x4a4744,0,0.915,it.d/4,g);
+  const k=R('cocina').pts;box(0.68,0.65,0.32,mat(C.salvia,{roughness:.7}),k[4][0]+0.34,1.78,k[4][1]-0.16);
+  it=F('lavamanos');g=grupo(it,scene);box(it.w,0.55,it.d-0.04,C.madera,0,0.52,0,g);box(it.w+0.01,0.1,it.d,C.blanco,0,0.84,0,g);cyl(0.012,0.14,C.acero,0,0.95,it.d/2-0.06,g);box(it.w,0.75,0.015,mat(0xdce8ec,{metalness:.15,roughness:.12}),0,1.5,it.d/2+0.012,g);
+  it=F('wc');g=grupo(it,scene);box(it.w,0.4,it.d-0.22,C.blanco,0,0.2,-0.11,g);box(it.w,0.78,0.2,C.blanco,0,0.39,it.d/2-0.1,g);
+  it=F('ducha');g=grupo(it,scene);box(it.w,0.05,it.d,C.blanco,0,0.025,0,g);const v=box(0.012,1.9,it.d,mVidrio,-it.w/2,0.97,0,g);v.castShadow=false;
+  it=F('lavadora');g=grupo(it,scene);box(it.w,0.85,it.d,C.blanco,0,0.425,0,g);cyl(0.22,0.75,C.blanco,0,1.72,0,g);
+})();
+
+// caminar
+const bloqueos=M.estructura.map(e=>[[e.x-e.w/2,e.y-e.d/2],[e.x+e.w/2,e.y-e.d/2],[e.x+e.w/2,e.y+e.d/2],[e.x-e.w/2,e.y+e.d/2]]).concat([M.fijos[0].pts]);
+const zonas=M.recintos.map(r=>{if(r.id!=='terraza2')return r.pts;const p=r.pts.map(q=>q.slice());[0,5].forEach(i=>{p[i][0]+=0.8387*0.2;p[i][1]-=0.5445*0.2;});return p;});
+const portales=M.vanos.filter(v=>v.id!=='puerta_entrada'&&v.tipo!=='ventana');
+function libre1(x,y){if(bloqueos.some(b=>pip(x,y,b)))return false;if(zonas.some(z=>pip(x,y,z)))return true;
+  return portales.some(v=>{const dx=v.b[0]-v.a[0],dy=v.b[1]-v.a[1],L=Math.hypot(dx,dy),al=((x-v.a[0])*dx+(y-v.a[1])*dy)/L,pe=Math.abs(((x-v.a[0])*-dy+(y-v.a[1])*dx)/L);return al>0&&al<L&&pe<0.36;});}
+const libre=(x,y)=>libre1(x,y)&&libre1(x+.15,y)&&libre1(x-.15,y)&&libre1(x,y+.15)&&libre1(x,y-.15);
+
+let yaw=0,pitch=0,pos={x:2.57,z:5.6},aerea=false,orb=0.6;
+const VISTAS=[['Entrada',[2.57,5.65],[3.6,2.6]],['Cama',[1.1,2.55],[4.8,3.6]],['Comedor',[2.9,3.1],[4.8,4.0]],['Escritorio',[2.6,3.6],[3.6,1.2]],['Cocina',[4.5,5.14],[5.6,5.3]],['Baño',[4.3,5.95],[5.2,6.9]],['Terraza',[6.0,3.0],[3.4,3.2]]];
+function ir(i){const v=VISTAS[i];pos.x=v[1][0];pos.z=v[1][1];yaw=Math.atan2(-(v[2][0]-pos.x),-(v[2][1]-pos.z));pitch=-0.06;setAerea(false);}
+const vb=document.getElementById('vistas');VISTAS.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.textContent=v[0];b.onclick=()=>ir(i);vb.appendChild(b);});
+const tog=(id,fn)=>{const b=document.getElementById(id);b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);fn(on);};};
+function setAerea(on){aerea=on;cielos.visible=!on;document.getElementById('b-aerea').setAttribute('aria-pressed',on);document.getElementById('help').textContent=on?'Vista aérea sin cielo. Arrastra para girar alrededor del departamento. Elige una vista para volver a caminar.':'Arrastra para mirar. Camina con W A S D o las flechas, o con los botones. La rueda del mouse avanza y retrocede.';}
+tog('b-aerea',setAerea);tog('b-cortinas',on=>cortinas.visible=on);tog('b-muebles',on=>muebles.visible=on);
+
+const keys={};let dragging=null;
+canvas.addEventListener('pointerdown',e=>{dragging={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';});
+canvas.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-dragging.x,dy=e.clientY-dragging.y;dragging={x:e.clientX,y:e.clientY};if(aerea)orb-=dx*0.006;else{yaw+=dx*0.004;pitch=Math.max(-1.2,Math.min(1.2,pitch+dy*0.004));}});
+['pointerup','pointercancel'].forEach(n=>canvas.addEventListener(n,()=>{dragging=null;canvas.style.cursor='grab';}));
+canvas.addEventListener('wheel',e=>{e.preventDefault();if(!aerea)mover(-Math.sign(e.deltaY)*0.25,0);},{passive:false});
+const KM={KeyW:'f',ArrowUp:'f',KeyS:'b',ArrowDown:'b',KeyA:'l',KeyD:'r',ArrowLeft:'tl',ArrowRight:'tr',KeyQ:'tl',KeyE:'tr'};
+addEventListener('keydown',e=>{const k=KM[e.code];if(k){keys[k]=1;e.preventDefault();}});addEventListener('keyup',e=>{const k=KM[e.code];if(k)keys[k]=0;});
+document.querySelectorAll('.pad button').forEach(b=>{const k=b.dataset.k;b.addEventListener('pointerdown',e=>{keys[k]=1;b.setPointerCapture(e.pointerId);});['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,()=>keys[k]=0));});
+function mover(f,s){const fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),nx=pos.x+fx*f+rx*s,nz=pos.z+fz*f+rz*s;
+  if(libre(nx,nz)){pos.x=nx;pos.z=nz;}else if(libre(nx,pos.z))pos.x=nx;else if(libre(pos.x,nz))pos.z=nz;}
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();ir(0);
+if(location.hash==='#aerea')setAerea(true);
+let last=performance.now();
+(function loop(t){const dt=Math.min(0.05,(t-last)/1000);last=t;
+  if(!aerea){const v=1.6*dt;mover(((keys.f||0)-(keys.b||0))*v,((keys.r||0)-(keys.l||0))*v);yaw+=((keys.tl||0)-(keys.tr||0))*1.6*dt;cam.position.set(pos.x,EYE,pos.z);cam.rotation.set(pitch,yaw,0);}
+  else{orb+=((keys.tl||0)-(keys.tr||0))*dt;cam.position.set(2.9+Math.sin(orb)*4.6,8.2,3.6+Math.cos(orb)*4.6);cam.lookAt(2.9,0.4,3.6);}
+  renderer.render(scene,cam);requestAnimationFrame(loop);})(last);
+})();
+</script>
+</body>
+</html>
